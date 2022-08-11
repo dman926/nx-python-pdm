@@ -1,0 +1,8 @@
+{
+  "$schema": "./node_modules/nx/schemas/workspace-schema.json",
+  "version": 2,
+  "projects": {
+    "nx-python3": "packages/nx-python3",
+    "nx-python3-e2e": "e2e/nx-python3-e2e"
+  }
+}
