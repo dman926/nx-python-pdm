@@ -12,7 +12,6 @@ import { sync as commandExistsSync } from 'command-exists';
 import * as path from 'path';
 import { appendFileSync } from 'fs';
 import { execSync } from 'child_process';
-// eslint-disable-next-line import/extensions
 import { ApplicationGeneratorSchema } from './schema';
 import { runPipenvCommand } from '../../utils';
 
@@ -106,6 +105,7 @@ export default async function (
       logger.error('Please install the above packages with pip');
     }
     if (exitFlag.hard) {
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
       return () => {};
     }
   }
@@ -116,22 +116,22 @@ export default async function (
     sourceRoot: `${normalizedOptions.projectRoot}/src`,
     targets: {
       build: {
-        executor: '@daidarabotchi/nx-python:build',
+        executor: '@dman926/nx-python3:build',
       },
       lint: {
-        executor: '@daidarabotchi/nx-python:lint',
+        executor: '@dman926/nx-python3:lint',
       },
       pipenv: {
-        executor: '@daidarabotchi/nx-python:pipenv',
+        executor: '@dman926/nx-python3:pipenv',
       },
       serve: {
-        executor: '@daidarabotchi/nx-python:serve',
+        executor: '@dman926/nx-python3:serve',
       },
       test: {
-        executor: '@daidarabotchi/nx-python:test',
+        executor: '@dman926/nx-python3:test',
       },
       clean: {
-        executor: '@daidarabotchi/nx-python:pipenv',
+        executor: '@dman926/nx-python3:pipenv',
         options: {
           command: '--rm',
         },
@@ -141,6 +141,9 @@ export default async function (
   });
   addFiles(tree, normalizedOptions);
   await formatFiles(tree);
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  return () => {};
+  /*
   return () => {
     const context = {
       workspace: {
@@ -254,4 +257,5 @@ export default async function (
       runPipenvCommand(context, `install --dev ${packages.join(' ')}`);
     }
   };
+  */
 }

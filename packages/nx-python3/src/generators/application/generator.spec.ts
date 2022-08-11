@@ -2,7 +2,6 @@ import { createTreeWithEmptyWorkspace } from '@nrwl/devkit/testing';
 import { Tree, readProjectConfiguration } from '@nrwl/devkit';
 
 import generator from './generator';
-// eslint-disable-next-line import/extensions
 import { ApplicationGeneratorSchema } from './schema';
 
 describe('nx-python generator', () => {

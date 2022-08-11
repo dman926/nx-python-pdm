@@ -1,5 +1,3 @@
-/* eslint-disable import/prefer-default-export */
-
 import { ExecutorContext, logger } from '@nrwl/devkit';
 import { execSync } from 'child_process';
 
