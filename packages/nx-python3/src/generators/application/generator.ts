@@ -117,6 +117,7 @@ export default async function (
     targets: {
       build: {
         executor: '@dman926/nx-python3:build',
+        dependsOn: ['sync'],
       },
       lint: {
         executor: '@dman926/nx-python3:lint',
@@ -126,6 +127,9 @@ export default async function (
       },
       serve: {
         executor: '@dman926/nx-python3:serve',
+      },
+      sync: {
+        executor: '@dman926/nx-python3:sync',
       },
       test: {
         executor: '@dman926/nx-python3:test',
@@ -142,8 +146,6 @@ export default async function (
   addFiles(tree, normalizedOptions);
   await formatFiles(tree);
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  return () => {};
-  /*
   return () => {
     const context = {
       workspace: {
@@ -160,11 +162,11 @@ export default async function (
     }`;
 
     if (!inGithubActions) {
-      // pipenv install frequently used dependencies (pipenv-setup [DEV]) (auto creates environment)
+      // pipenv install frequently used dependencies (pipenv-setup, setuptools, wheel) (DEV)
       // pipenv install a code formatter (nothing, black, autopep8) (DEV) (optional)
       // pipenv install a test runner (nothing for unittest, robot, pytest) (DEV) (optional)
       // pipenv install a type checker (mypi, pyright, pytype, pyre) (DEV) (optional)
-      const packages = ['setuptools', 'wheel'];
+      const packages = ['pipenv-setup', 'setuptools', 'wheel'];
       if (normalizedOptions.formatter !== 'none') {
         packages.push(normalizedOptions.formatter);
       }
@@ -241,6 +243,7 @@ export default async function (
       // const pipfile = readFileSync(`${cwd}/Pipfile`).toString().split('\n');
       const commands = [
         '[scripts]',
+        'sync = "pipenv-setup sync"',
         `build = "setup.py sdist bdist_wheel --dist-dir ../../dist/${normalizedOptions.projectName}"`,
       ];
       if (format) {
@@ -257,5 +260,4 @@ export default async function (
       runPipenvCommand(context, `install --dev ${packages.join(' ')}`);
     }
   };
-  */
 }

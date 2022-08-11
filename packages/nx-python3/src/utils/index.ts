@@ -7,6 +7,7 @@ export function runPythonCommand(
 ): { success: boolean; stdout?: Buffer } {
   const cmd = options.cmd || 'python3';
   const cwd = options.cwd || process.cwd();
+  console.log(cwd);
   const env = {
     ...process.env,
     ...(options.env || {}),

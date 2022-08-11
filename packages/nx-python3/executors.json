@@ -21,6 +21,11 @@
       "schema": "./src/executors/serve/schema.json",
       "description": "serve executor"
     },
+    "sync": {
+      "implementation": "./src/executors/sync/executor",
+      "schema": "./src/executors/sync/schema.json",
+      "description": "sync executor"
+    },
     "test": {
       "implementation": "./src/executors/test/executor",
       "schema": "./src/executors/test/schema.json",
