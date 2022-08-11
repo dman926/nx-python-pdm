@@ -2,11 +2,17 @@ import { createTreeWithEmptyWorkspace } from '@nrwl/devkit/testing';
 import { Tree, readProjectConfiguration } from '@nrwl/devkit';
 
 import generator from './generator';
-import { NxPython3GeneratorSchema } from './schema';
+// eslint-disable-next-line import/extensions
+import { ApplicationGeneratorSchema } from './schema';
 
-describe('nx-python3 generator', () => {
+describe('nx-python generator', () => {
   let appTree: Tree;
-  const options: NxPython3GeneratorSchema = { name: 'test' };
+  const options: ApplicationGeneratorSchema = {
+    name: 'test',
+    formatter: 'none',
+    testRunner: 'none',
+    typeChecker: 'none',
+  };
 
   beforeEach(() => {
     appTree = createTreeWithEmptyWorkspace();

@@ -1,0 +1,4 @@
+from src import helloWorldFunc
+
+if __name__ == "__main__":
+    helloWorldFunc()

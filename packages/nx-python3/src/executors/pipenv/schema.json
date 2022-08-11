@@ -1,0 +1,41 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "cli": "nx",
+  "title": "pipenv",
+  "description": "",
+  "type": "object",
+  "properties": {
+    "command": {
+      "type": "string",
+      "description": "Run a pipenv command in this project",
+      "$default": {
+        "$source": "argv",
+        "index": 0
+      },
+      "x-prompt": {
+        "message": "Run a pipenv command in this project",
+        "type": "list",
+        "items": [
+          "check",
+          "clean",
+          "graph",
+          "install",
+          "lock",
+          "open",
+          "run",
+          "scripts",
+          "shell",
+          "sync",
+          "requirements",
+          "uninstall",
+          "--rm"
+        ]
+      }
+    },
+    "options": {
+      "type": "string",
+      "description": "Optional options"
+    }
+  },
+  "required": ["command"]
+}

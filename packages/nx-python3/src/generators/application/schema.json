@@ -1,0 +1,72 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "cli": "nx",
+  "$id": "NxPython",
+  "title": "Application Generator",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "",
+      "$default": {
+        "$source": "argv",
+        "index": 0
+      },
+      "x-prompt": "What name would you like to use?"
+    },
+    "tags": {
+      "type": "string",
+      "description": "Add tags to the project (used for linting)",
+      "alias": "t"
+    },
+    "directory": {
+      "type": "string",
+      "description": "A directory where the project is placed",
+      "alias": "d"
+    },
+    "allowPre": {
+      "type": "boolean",
+      "description": "Allow pipenv to use prereleases",
+      "alias": "p",
+      "default": false
+    },
+    "formatter": {
+      "type": "string",
+      "description": "Install and configure an optional formatter",
+      "default": "black",
+      "x-prompt": {
+        "message": "Install and configure an optional type checker",
+        "type": "list",
+        "items": ["none", "autopep8", "black"]
+      }
+    },
+    "testRunner": {
+      "type": "string",
+      "description": "Install and configure an optional test runner",
+      "default": "robot",
+      "x-prompt": {
+        "message": "Install and configure an optional test runner",
+        "type": "list",
+        "items": [
+          {
+            "value": "none",
+            "label": "none (using unittest)"
+          },
+          "pytest",
+          "robot"
+        ]
+      }
+    },
+    "typeChecker": {
+      "type": "string",
+      "description": "Install and configure an optional type checker",
+      "default": "pyre",
+      "x-prompt": {
+        "message": "Install and configure an optional type checker",
+        "type": "list",
+        "items": ["none", "mypy", "pyright", "pytype", "pyre"]
+      }
+    }
+  },
+  "required": ["name"]
+}

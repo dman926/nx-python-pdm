@@ -1,13 +1,13 @@
 // There's a fake eslint error here
 // eslint-disable-next-line import/extensions
-import { BuildExecutorSchema } from './schema';
+import { TestExecutorSchema } from './schema';
 import executor from './executor';
 
 jest.mock('../../utils');
 // eslint-disable-next-line import/first
 import * as utils from '../../utils';
 
-const options: BuildExecutorSchema = { outputPath: '', setup: '' };
+const options: TestExecutorSchema = {};
 
 describe('Build Executor', () => {
   beforeEach(async () => {
