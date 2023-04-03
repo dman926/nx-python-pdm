@@ -15,7 +15,8 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@dman926/nx-python3": ["packages/nx-python3/src/index.ts"]
+      "@dman926/nx-python3": ["packages/nx-python3/src/index.ts"],
+      "@dman_926/nx-python3": ["packages/nx-python3/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

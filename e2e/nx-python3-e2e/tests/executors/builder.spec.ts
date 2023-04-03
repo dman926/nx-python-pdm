@@ -8,7 +8,7 @@ describe('builder executor', () => {
   let project: string;
 
   beforeEach(async () => {
-    project = uniq('python3');
+    project = uniq('nx-python3');
     ensureNxProject('@dman926/nx-python3', 'dist/packages/nx-python3');
     await runNxCommandAsync(
       `generate @dman926/nx-python3:application ${project} --no-interactive`
@@ -17,7 +17,6 @@ describe('builder executor', () => {
 
   afterEach(async () => {
     // Clean up pipenv
-    await runNxCommandAsync(`run ${project}:clean`);
     await runNxCommandAsync(
       `generate @nrwl/workspace:remove ${project} --no-interactive`
     );

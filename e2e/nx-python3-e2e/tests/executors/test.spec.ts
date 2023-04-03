@@ -17,7 +17,6 @@ describe.skip('test executor', () => {
 
   afterAll(async () => {
     // Clean up pipenv
-    await runNxCommandAsync(`run ${project}:clean`);
     await runNxCommandAsync(
       `generate @nrwl/workspace:remove ${project} --no-interactive`
     );

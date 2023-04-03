@@ -188,8 +188,8 @@ export default async function (
         }
         packages.push(typeCheckerPackage);
       }
-      logger.info(`Executing command: pipenv install`);
-      execSync('pipenv install', { cwd });
+      logger.info(`Executing command: PIPENV_VENV_IN_PROJECT=1 pipenv install`);
+      execSync('PIPENV_VENV_IN_PROJECT=1 pipenv install', { cwd });
       if (normalizedOptions.allowPre) {
         runPipenvCommand(context, 'install --pre');
       }

@@ -10,6 +10,13 @@
         "target": "nx-python3:build",
         "jestConfig": "e2e/nx-python3-e2e/jest.config.ts"
       }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["e2e/nx-python3-e2e/**/*.ts"]
+      }
     }
   },
   "tags": [],
