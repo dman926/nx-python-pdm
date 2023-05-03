@@ -52,7 +52,8 @@
       "outputs": ["{workspaceRoot}/coverage/{projectName}"],
       "options": {
         "jestConfig": "jest.config.app.ts",
-        "passWithNoTests": true
+        "passWithNoTests": true,
+        "coverageDirectory": "./coverage/nx-pipenv"
       },
       "configurations": {
         "ci": {

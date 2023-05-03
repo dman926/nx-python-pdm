@@ -8,7 +8,9 @@
       "executor": "@nx/plugin:e2e",
       "options": {
         "target": "nx-pipenv:build",
-        "jestConfig": "e2e/jest.config.ts"
+        "jestConfig": "e2e/jest.config.ts",
+        "codeCoverage": true,
+        "coverageDirectory": "coverage/e2e"
       }
     },
     "lint": {
