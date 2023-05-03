@@ -4,17 +4,25 @@ on:
   push:
     branches:
       - main
+    paths-ignore:
+      - .github/**
+      - .vscode/**
   pull_request:
+    paths-ignore:
+      - .github/**
+      - .vscode/**
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   main:
-    name: Nx Cloud - Main Job
-    uses: nrwl/ci/.github/workflows/nx-cloud-main.yml@v0.11.3
+    name: Main Job
+    uses: ./.github/workflows/nx-cloud-main.yml
+    secrets: inherit
     with:
-      main-branch-name: main
       number-of-agents: 3
-      init-commands: |
-        pnpm exec nx-cloud start-ci-run --stop-agents-after="build" --agent-count=3
       parallel-commands: |
         pnpm exec nx-cloud record -- pnpm exec nx format:check
       parallel-commands-on-agents: |
@@ -23,7 +31,8 @@ jobs:
         pnpm exec nx affected --target=build --parallel=3
 
   agents:
-    name: Nx Cloud - Agents
-    uses: nrwl/ci/.github/workflows/nx-cloud-agents.yml@v0.11.3
+    name: Agents
+    uses: ./.github/workflows/nx-cloud-agents.yml
+    secrets: inherit
     with:
       number-of-agents: 3
