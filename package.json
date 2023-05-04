@@ -34,5 +34,6 @@
     "typescript": "~4.9.5",
     "@nx/plugin": "16.0.3"
   },
-  "type": "commonjs"
+  "type": "commonjs",
+  "executors": "./executors.json"
 }
