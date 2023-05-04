@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "version": 2,
+  "title": "Pipenv executor",
+  "cli": "nx",
+  "description": "Run a generic pipenv command in this project",
+  "type": "object",
+  "properties": {
+    "command": {
+      "type": "string",
+      "description": "The command to run. 'pipenv ' is prepended to this command.",
+      "x-priority": "important",
+      "$default": {
+        "$source": "argv",
+        "index": 0
+      }
+    },
+    "cwd": {
+      "type": "string",
+      "description": "Override where the command runs. By default, the command runs in the project root.",
+      "x-completion-type": "directory"
+    },
+    "raw": {
+      "type": "boolean",
+      "description": "Do not prepend 'pipenv ' to the given command.",
+      "default": false
+    }
+  },
+  "required": ["command"]
+}
