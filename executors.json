@@ -3,7 +3,7 @@
     "pipenv": {
       "implementation": "./src/executors/pipenv/executor",
       "schema": "./src/executors/pipenv/schema.json",
-      "description": "A generic pipenv command executor."
+      "description": "Run a generic pipenv command in this project"
     }
   }
 }
