@@ -35,5 +35,6 @@
     "typescript": "~4.9.5"
   },
   "type": "commonjs",
-  "executors": "./executors.json"
+  "executors": "./executors.json",
+  "generators": "./generators.json"
 }
