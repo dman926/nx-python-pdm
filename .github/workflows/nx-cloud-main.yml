@@ -53,6 +53,10 @@ on:
         required: false
         type: string
         default: 'nx-main-artifacts'
+      python-version:
+        required: false
+        type: string
+        default: '3.x'
 
 env:
   NX_CLOUD_DISTRIBUTED_EXECUTION: true
@@ -87,6 +91,11 @@ jobs:
         with:
           # We need to fetch all branches and commits so that Nx affected has a base to compare against.
           fetch-depth: 0
+
+      - name: Set up Python ${{ inputs.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ inputs.python-version }}
 
       - name: Derive appropriate SHAs for base and head for `nx affected` commands
         uses: nrwl/nx-set-shas@177b48373c6dc583ce0d9257ffb484bdd232fedf # pin@v3

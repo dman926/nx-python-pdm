@@ -23,12 +23,17 @@ jobs:
     secrets: inherit
     with:
       number-of-agents: 3
+      python-version: '3.11'
+      init-commands: |
+        python -m pip install --upgrade pip
+        pip install pipenv
       parallel-commands: |
         pnpm exec nx-cloud record -- pnpm exec nx format:check
       parallel-commands-on-agents: |
         pnpm exec nx affected --target=lint --parallel=3
         pnpm exec nx affected --target=test --parallel=3 --ci --code-coverage
         pnpm exec nx affected --target=build --parallel=3
+        pnpm exec nx affected --target=e2e --parallel=3
 
   agents:
     name: Agents
@@ -36,3 +41,7 @@ jobs:
     secrets: inherit
     with:
       number-of-agents: 3
+      python-version: '3.11'
+      init-commands: |
+        python -m pip install --upgrade pip
+        pip install pipenv
