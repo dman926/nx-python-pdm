@@ -6,8 +6,8 @@ import {
   getWorkspaceLayout,
   Tree,
   offsetFromRoot,
+  joinPathFragments,
 } from '@nx/devkit';
-import * as path from 'path';
 import { PythonGeneratorSchema } from './schema';
 import { pipenv } from '../../pipenv/pipenv';
 
@@ -81,10 +81,19 @@ export default async function (tree: Tree, options: PythonGeneratorSchema) {
     tags: parsedTags,
   });
 
-  generateFiles(tree, path.join(__dirname, 'files'), projectRoot, options);
+  generateFiles(
+    tree,
+    joinPathFragments(__dirname, 'files'),
+    projectRoot,
+    options
+  );
+
   return async () => {
-    await pipenv('rm Pipfile Pipfile.lock', { raw: true });
-    await pipenv('install --dev wheel setuptools pipenv-setup');
+    const cwd = joinPathFragments(process.cwd(), projectRoot);
+    await pipenv('rm Pipfile Pipfile.lock', { cwd, raw: true });
+    await pipenv('install --dev wheel setuptools pipenv-setup', {
+      cwd,
+    });
     await formatFiles(tree);
   };
 }

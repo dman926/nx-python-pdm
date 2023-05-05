@@ -19,7 +19,7 @@ export interface PipenvOptions {
  */
 export const pipenv = (
   command: string,
-  { cwd, raw }: Partial<PipenvOptions> = { cwd: undefined, raw: false }
+  { cwd, raw }: Partial<PipenvOptions>
 ): Promise<string> =>
   promisify(exec)(`${raw ? '' : 'pipenv '}${command}`, {
     env: { ...process.env, PIPENV_VENV_IN_PROJECT: '1' },
