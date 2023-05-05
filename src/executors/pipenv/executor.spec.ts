@@ -33,11 +33,10 @@ describe('Pipenv Executor', () => {
   it('should call pipenv with the command and project root', async () => {
     const options: PipenvExecutorSchema = { command: 'install', raw: false };
     await runPipenv(options, mockContext);
-    expect(mockPipenv).toHaveBeenCalledWith(
-      'install',
-      '/path/to/project',
-      false
-    );
+    expect(mockPipenv).toHaveBeenCalledWith('install', {
+      cwd: '/path/to/project',
+      raw: false,
+    });
   });
 
   it('should call pipenv with the provided cwd if specified', async () => {
@@ -47,17 +46,19 @@ describe('Pipenv Executor', () => {
       raw: false,
     };
     await runPipenv(options, mockContext);
-    expect(mockPipenv).toHaveBeenCalledWith('run', '/path/to/cwd', false);
+    expect(mockPipenv).toHaveBeenCalledWith('run', {
+      cwd: '/path/to/cwd',
+      raw: false,
+    });
   });
 
   it('should call pipenv with the "raw" option if specified', async () => {
     const options: PipenvExecutorSchema = { command: 'install', raw: true };
     await runPipenv(options, mockContext);
-    expect(mockPipenv).toHaveBeenCalledWith(
-      'install',
-      '/path/to/project',
-      true
-    );
+    expect(mockPipenv).toHaveBeenCalledWith('install', {
+      cwd: '/path/to/project',
+      raw: true,
+    });
   });
 
   it('should return an object with "success" set to true if pipenv succeeds', async () => {

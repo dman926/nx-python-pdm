@@ -80,7 +80,11 @@ export default async function (tree: Tree, options: PythonGeneratorSchema) {
     },
     tags: parsedTags,
   });
-  await pipenv('install --dev wheel setuptools pipenv-setup');
+
   generateFiles(tree, path.join(__dirname, 'files'), projectRoot, options);
-  await formatFiles(tree);
+  return async () => {
+    await pipenv('rm Pipfile Pipfile.lock', { raw: true });
+    await pipenv('install --dev wheel setuptools pipenv-setup');
+    await formatFiles(tree);
+  };
 }

@@ -31,6 +31,12 @@ describe('python generator', () => {
     await generator(tree, options);
     const config = readProjectConfiguration(tree, 'test');
     expect(config).toBeDefined();
+  });
+
+  it('should return a function that configures pipenv', async () => {
+    const outputFn = jest.fn(await generator(tree, options));
+    await outputFn();
+    expect(mockPipenv).toBeCalledWith('rm Pipfile Pipfile.lock', { raw: true });
     expect(mockPipenv).toBeCalledWith(
       'install --dev wheel setuptools pipenv-setup'
     );

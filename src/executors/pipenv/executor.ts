@@ -10,7 +10,7 @@ export default async function runPipenv(
     context.projectsConfigurations.projects[context.projectName].root;
   const { command, cwd, raw } = options;
 
-  return pipenv(command, cwd || projectRoot, raw)
+  return pipenv(command, { cwd: cwd || projectRoot, raw })
     .then(() => ({
       success: true,
     }))

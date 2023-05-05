@@ -31,5 +31,5 @@
       "description": "Add tags to the project (used for linting)"
     }
   },
-  "required": ["name", "type"]
+  "required": ["name", "projectType"]
 }
