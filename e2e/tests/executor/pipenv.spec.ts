@@ -5,7 +5,7 @@ import {
   runNxCommand,
 } from "@nx/plugin/testing";
 
-describe.skip("pipenv executor", () => {
+describe.skip("pdm executor", () => {
   // Setting up individual workspaces per
   // test can cause e2e runs to take a long time.
   // For this reason, we recommend each suite only
@@ -13,7 +13,7 @@ describe.skip("pipenv executor", () => {
   // on a unique project in the workspace, such that they
   // are not dependant on one another.
   beforeAll(() => {
-    ensureNxProject("nx-pipenv", "dist/./.");
+    ensureNxProject("nx-python-pdm", "dist/./.");
   });
 
   afterAll(async () => {
@@ -27,7 +27,7 @@ describe.skip("pipenv executor", () => {
   xit("should be able to build generated projects", async () => {
     const name = "proj";
     const generator = "PLACEHOLDER";
-    await runNxCommandAsync(`generate nx-pipenv:${generator} --name ${name}`);
+    await runNxCommandAsync(`generate nx-python-pdm:${generator} --name ${name}`);
     expect(() => runNxCommand("build ${proj}")).not.toThrow();
     expect(() => checkFilesExist(`dist/${name}/index.js`)).not.toThrow();
   });

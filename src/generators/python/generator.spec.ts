@@ -3,14 +3,14 @@ import { Tree, readProjectConfiguration } from '@nx/devkit';
 
 import generator from './generator';
 import { PythonGeneratorSchema } from './schema';
-import { pipenv } from '../../pipenv/pipenv';
+import { pdm } from '../../pdm/pdm';
 
-// Mock the pipenv function
-jest.mock('../../pipenv/pipenv', () => ({
-  pipenv: jest.fn(() => Promise.resolve('pipenv output')),
+// Mock the pdm function
+jest.mock('../../pdm/pdm', () => ({
+  pdm: jest.fn(() => Promise.resolve('pdm output')),
 }));
 
-const mockPipenv = jest.mocked(pipenv);
+const mockpdm = jest.mocked(pdm);
 
 describe('python generator', () => {
   let tree: Tree;
@@ -33,12 +33,12 @@ describe('python generator', () => {
     expect(config).toBeDefined();
   });
 
-  it('should return a function that configures pipenv', async () => {
+  it('should return a function that configures pdm', async () => {
     const outputFn = jest.fn(await generator(tree, options));
     await outputFn();
-    expect(mockPipenv).toBeCalledWith('rm Pipfile Pipfile.lock', { raw: true });
-    expect(mockPipenv).toBeCalledWith(
-      'install --dev wheel setuptools pipenv-setup'
+    expect(mockpdm).toBeCalledWith('rm Pipfile Pipfile.lock', { raw: true });
+    expect(mockpdm).toBeCalledWith(
+      'install --dev wheel setuptools pdm-setup'
     );
   });
 });

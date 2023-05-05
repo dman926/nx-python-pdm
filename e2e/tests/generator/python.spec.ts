@@ -12,7 +12,7 @@ describe("python generator", () => {
   // on a unique project in the workspace, such that they
   // are not dependant on one another.
   beforeAll(() => {
-    ensureNxProject("nx-pipenv", "dist/./.");
+    ensureNxProject("nx-python-pdm", "dist/./.");
   });
 
   afterAll(async () => {
@@ -24,7 +24,7 @@ describe("python generator", () => {
   it("should be able to generated project files", async () => {
     const name = "generate-proj";
     const baseDir = `app/${name}/`;
-    await runNxCommandAsync(`generate nx-pipenv:python --name ${name}`);
+    await runNxCommandAsync(`generate nx-python-pdm:python --name ${name}`);
     expect(() => checkFilesExist(...['main.py', 'Pipfile', 'Pipfile.lock'].map((el) => `${baseDir}/${el}`))).not.toThrow();
   });
 });

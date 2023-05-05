@@ -4,7 +4,7 @@
   "title": "Python project generator",
   "cli": "nx",
   "type": "object",
-  "description": "Generate a generic python application or library powered by pipenv",
+  "description": "Generate a generic python application or library powered by pdm",
   "properties": {
     "name": {
       "type": "string",

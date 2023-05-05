@@ -1,28 +1,28 @@
 import { exec } from 'child_process';
 import { promisify } from 'util';
 
-export interface PipenvOptions {
+export interface pdmOptions {
   cwd: string;
   raw: boolean;
 }
 
 /**
- * Executes the given command using pipenv and returns a promise that
+ * Executes the given command using pdm and returns a promise that
  * resolves with the command's output. If `cwd` is provided, the command
  * will be executed in the specified directory. If `raw` is true, the
- * command will be executed without the "pipenv" prefix.
+ * command will be executed without the "pdm" prefix.
  *
- * @param command The command to execute using pipenv.
+ * @param command The command to execute using pdm.
  * @param cwd The directory to execute the command in.
- * @param raw Whether to execute the command without the "pipenv" prefix.
+ * @param raw Whether to execute the command without the "pdm" prefix.
  * @returns A promise that resolves with the command's output.
  */
-export const pipenv = (
+export const pdm = (
   command: string,
-  { cwd, raw }: Partial<PipenvOptions>
+  { cwd, raw }: Partial<pdmOptions>
 ): Promise<string> =>
-  promisify(exec)(`${raw ? '' : 'pipenv '}${command}`, {
-    env: { ...process.env, PIPENV_VENV_IN_PROJECT: '1' },
+  promisify(exec)(`${raw ? '' : 'pdm '}${command}`, {
+    env: { ...process.env, pdm_VENV_IN_PROJECT: '1' },
     cwd,
   }).then(({ stdout, stderr }) => {
     if (stderr) {
@@ -31,4 +31,4 @@ export const pipenv = (
     return stdout.trim();
   });
 
-export default pipenv;
+export default pdm;

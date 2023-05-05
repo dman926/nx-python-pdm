@@ -1,16 +1,16 @@
 import { ExecutorContext } from '@nx/devkit';
-import { PipenvExecutorSchema } from './schema';
-import { pipenv } from '../../pipenv/pipenv';
+import { pdmExecutorSchema } from './schema';
+import { pdm } from '../../pdm/pdm';
 
-export default async function runPipenv(
-  options: PipenvExecutorSchema,
+export default async function runpdm(
+  options: pdmExecutorSchema,
   context: ExecutorContext
 ) {
   const projectRoot =
     context.projectsConfigurations.projects[context.projectName].root;
   const { command, cwd, raw } = options;
 
-  return pipenv(command, { cwd: cwd || projectRoot, raw })
+  return pdm(command, { cwd: cwd || projectRoot, raw })
     .then(() => ({
       success: true,
     }))

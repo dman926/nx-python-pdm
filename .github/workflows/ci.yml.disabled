@@ -26,7 +26,7 @@ jobs:
       python-version: '3.11'
       init-commands: |
         python -m pip install --upgrade pip
-        pip install pipenv
+        pip install pdm
       parallel-commands: |
         pnpm exec nx-cloud record -- pnpm exec nx format:check
       parallel-commands-on-agents: |
@@ -44,4 +44,4 @@ jobs:
       python-version: '3.11'
       init-commands: |
         python -m pip install --upgrade pip
-        pip install pipenv
+        pip install pdm

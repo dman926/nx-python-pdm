@@ -9,7 +9,7 @@ import {
   joinPathFragments,
 } from '@nx/devkit';
 import { PythonGeneratorSchema } from './schema';
-import { pipenv } from '../../pipenv/pipenv';
+import { pdm } from '../../pdm/pdm';
 
 interface NormalizedOptions extends PythonGeneratorSchema {
   projectName: string;
@@ -62,20 +62,20 @@ export default async function (tree: Tree, options: PythonGeneratorSchema) {
     sourceRoot: projectRoot,
     targets: {
       build: {
-        executor: 'nx-pipenv:pipenv',
+        executor: 'nx-python-pdm:pdm',
         dependsOn: ['sync'],
         options: {
           command: `run python setup.py bdist_wheel --bdist-dir=${rootOffset}build/${projectDirectory}`,
         },
       },
       sync: {
-        executor: 'nx-pipenv:pipenv',
+        executor: 'nx-python-pdm:pdm',
         options: {
-          command: 'run pipenv-setup sync',
+          command: 'run pdm-setup sync',
         },
       },
-      pipenv: {
-        executor: 'nx-pipenv:pipenv',
+      pdm: {
+        executor: 'nx-python-pdm:pdm',
       },
     },
     tags: parsedTags,
@@ -90,8 +90,8 @@ export default async function (tree: Tree, options: PythonGeneratorSchema) {
 
   return async () => {
     const cwd = joinPathFragments(process.cwd(), projectRoot);
-    await pipenv('rm Pipfile Pipfile.lock', { cwd, raw: true });
-    await pipenv('install --dev wheel setuptools pipenv-setup', {
+    await pdm('rm Pipfile Pipfile.lock', { cwd, raw: true });
+    await pdm('install --dev wheel setuptools pdm-setup', {
       cwd,
     });
     await formatFiles(tree);

@@ -7,7 +7,7 @@
     "e2e": {
       "executor": "@nx/plugin:e2e",
       "options": {
-        "target": "nx-pipenv:build",
+        "target": "nx-python-pdm:build",
         "jestConfig": "e2e/jest.config.ts",
         "codeCoverage": true,
         "coverageDirectory": "coverage/e2e"
@@ -22,5 +22,5 @@
     }
   },
   "tags": [],
-  "implicitDependencies": ["nx-pipenv"]
+  "implicitDependencies": ["nx-python-pdm"]
 }
