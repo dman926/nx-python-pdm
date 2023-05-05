@@ -62,7 +62,7 @@ describe('pipenv', () => {
     const mockCwd = '/home/user/project';
     mockPromisify.mockImplementationOnce(() => success);
 
-    const output = await pipenv('version', mockCwd);
+    const output = await pipenv('version', { cwd: mockCwd });
     expect(success).toHaveBeenCalledWith('pipenv version', {
       env: { ...process.env, PIPENV_VENV_IN_PROJECT: '1' },
       cwd: mockCwd,
@@ -75,7 +75,7 @@ describe('pipenv', () => {
     const mockCwd = '/home/user/project';
     mockPromisify.mockImplementationOnce(() => success);
 
-    const output = await pipenv('version', mockCwd, true);
+    const output = await pipenv('version', { cwd: mockCwd, raw: true });
     expect(success).toHaveBeenCalledWith('version', {
       env: { ...process.env, PIPENV_VENV_IN_PROJECT: '1' },
       cwd: mockCwd,
@@ -87,7 +87,7 @@ describe('pipenv', () => {
     // Mock the exec function to return a promise that resolves with mocked stdout and an empty stderr.
     mockPromisify.mockImplementationOnce(() => success);
 
-    const output = await pipenv('version', undefined, true);
+    const output = await pipenv('version', { raw: true });
     expect(success).toHaveBeenCalledWith('version', {
       env: { ...process.env, PIPENV_VENV_IN_PROJECT: '1' },
     });
