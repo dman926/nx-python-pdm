@@ -25,10 +25,17 @@ on:
       install-commands:
         required: false
         type: string
+      init-commands:
+        required: false
+        type: string  
       runs-on:
         required: false
         type: string
         default: ubuntu-latest
+      python-version:
+        required: false
+        type: string
+        default: '3.x'
 
 env:
   NX_CLOUD_DISTRIBUTED_EXECUTION: true
@@ -83,6 +90,11 @@ jobs:
         shell: bash
     steps:
       - uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # pin@v3
+
+      - name: Set up Python ${{ inputs.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ inputs.python-version }}
 
       - name: Detect package manager
         id: package_manager
@@ -231,6 +243,13 @@ jobs:
             echo "Running npm ci"
             npm ci
           fi
+
+      # The good thing about the multi-line string input for sequential commands is that we can simply forward it on as is to the bash shell and it will behave
+      # how we want it to in terms of quote escaping, variable assignment etc
+      - name: Run any configured init-commands sequentially
+        if: ${{ inputs.init-commands != '' }}
+        run: |
+          ${{ inputs.init-commands }}
 
       - name: Start Nx Agent ${{ matrix.agent }}
         run: npx nx-cloud start-agent

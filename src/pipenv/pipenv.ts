@@ -1,6 +1,11 @@
 import { exec } from 'child_process';
 import { promisify } from 'util';
 
+export interface PipenvOptions {
+  cwd: string;
+  raw: boolean;
+}
+
 /**
  * Executes the given command using pipenv and returns a promise that
  * resolves with the command's output. If `cwd` is provided, the command
@@ -14,8 +19,7 @@ import { promisify } from 'util';
  */
 export const pipenv = (
   command: string,
-  cwd?: string,
-  raw = false
+  { cwd, raw }: Partial<PipenvOptions>
 ): Promise<string> =>
   promisify(exec)(`${raw ? '' : 'pipenv '}${command}`, {
     env: { ...process.env, PIPENV_VENV_IN_PROJECT: '1' },
