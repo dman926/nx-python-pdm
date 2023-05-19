@@ -1,7 +1,9 @@
 import { exec } from 'child_process';
 import { promisify } from 'util';
 
-export interface pdmOptions {
+export const LARGE_BUFFER = 1024 * 1000000;
+
+export interface PdmOptions {
   cwd: string;
   raw: boolean;
 }
@@ -19,10 +21,11 @@ export interface pdmOptions {
  */
 export const pdm = (
   command: string,
-  { cwd, raw }: Partial<pdmOptions>
+  { cwd, raw }: Partial<PdmOptions> = {}
 ): Promise<string> =>
   promisify(exec)(`${raw ? '' : 'pdm '}${command}`, {
-    env: { ...process.env, pdm_VENV_IN_PROJECT: '1' },
+    maxBuffer: LARGE_BUFFER,
+    env: process.env,
     cwd,
   }).then(({ stdout, stderr }) => {
     if (stderr) {

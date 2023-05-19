@@ -7,8 +7,9 @@ import {
   Tree,
   offsetFromRoot,
   joinPathFragments,
+  ProjectType,
 } from '@nx/devkit';
-import { PythonGeneratorSchema } from './schema';
+import { BuildBackend, PythonGeneratorSchema } from './schema';
 import { pdm } from '../../pdm/pdm';
 
 interface NormalizedOptions extends PythonGeneratorSchema {
@@ -46,9 +47,27 @@ const normalizeOptions = (
   };
 };
 
-export default async function (tree: Tree, options: PythonGeneratorSchema) {
+export const pdmInitCommand = (
+  projectType: ProjectType,
+  buildBackend?: BuildBackend
+) => {
+  let pdmInitCommand = 'init --non-interactive';
+  if (projectType === 'library') {
+    pdmInitCommand += ' --lib';
+  }
+  if (buildBackend) {
+    pdmInitCommand += ` --backend=${buildBackend}`;
+  }
+  return pdmInitCommand;
+};
+
+export async function pythonGenerator(
+  tree: Tree,
+  options: PythonGeneratorSchema
+) {
   const normalizedOptions = normalizeOptions(tree, options);
   const {
+    buildBackend,
     parsedTags,
     projectDirectory,
     projectName,
@@ -65,13 +84,7 @@ export default async function (tree: Tree, options: PythonGeneratorSchema) {
         executor: 'nx-python-pdm:pdm',
         dependsOn: ['sync'],
         options: {
-          command: `run python setup.py bdist_wheel --bdist-dir=${rootOffset}build/${projectDirectory}`,
-        },
-      },
-      sync: {
-        executor: 'nx-python-pdm:pdm',
-        options: {
-          command: 'run pdm-setup sync',
+          command: `build --dest=${rootOffset}build/${projectDirectory}`,
         },
       },
       pdm: {
@@ -90,10 +103,13 @@ export default async function (tree: Tree, options: PythonGeneratorSchema) {
 
   return async () => {
     const cwd = joinPathFragments(process.cwd(), projectRoot);
-    await pdm('rm Pipfile Pipfile.lock', { cwd, raw: true });
-    await pdm('install --dev wheel setuptools pdm-setup', {
+
+    await pdm('rm pyproject.toml', { cwd, raw: true });
+    await pdm(pdmInitCommand(projectType, buildBackend), {
       cwd,
     });
     await formatFiles(tree);
   };
 }
+
+export default pythonGenerator;

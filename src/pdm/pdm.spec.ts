@@ -1,6 +1,6 @@
 import { promisify } from 'util';
 import { exec } from 'child_process';
-import { pdm } from './pdm';
+import { pdm, LARGE_BUFFER } from './pdm';
 
 // Mock the exec function to avoid actually executing commands during the tests.
 jest.mock('util', () => ({
@@ -46,13 +46,14 @@ describe('pdm', () => {
     expect(success).toHaveBeenCalled();
   });
 
-  it('should execute a pdm command with pdm_VENV_IN_PROJECT option', async () => {
+  it('should execute a pdm command with processEnv option', async () => {
     // Mock the exec function to return a promise that resolves with mocked stdout and an empty stderr.
     mockPromisify.mockImplementationOnce(() => success);
 
     const output = await pdm('version');
     expect(success).toHaveBeenCalledWith('pdm version', {
-      env: { ...process.env, pdm_VENV_IN_PROJECT: '1' },
+      maxBuffer: LARGE_BUFFER,
+      env: process.env,
     });
     expect(output).toEqual(mockStdout);
   });
@@ -64,7 +65,8 @@ describe('pdm', () => {
 
     const output = await pdm('version', { cwd: mockCwd });
     expect(success).toHaveBeenCalledWith('pdm version', {
-      env: { ...process.env, pdm_VENV_IN_PROJECT: '1' },
+      maxBuffer: LARGE_BUFFER,
+      env: process.env,
       cwd: mockCwd,
     });
     expect(output).toEqual(mockStdout);
@@ -77,7 +79,8 @@ describe('pdm', () => {
 
     const output = await pdm('version', { cwd: mockCwd, raw: true });
     expect(success).toHaveBeenCalledWith('version', {
-      env: { ...process.env, pdm_VENV_IN_PROJECT: '1' },
+      maxBuffer: LARGE_BUFFER,
+      env: process.env,
       cwd: mockCwd,
     });
     expect(output).toEqual(mockStdout);
@@ -89,7 +92,8 @@ describe('pdm', () => {
 
     const output = await pdm('version', { raw: true });
     expect(success).toHaveBeenCalledWith('version', {
-      env: { ...process.env, pdm_VENV_IN_PROJECT: '1' },
+      maxBuffer: LARGE_BUFFER,
+      env: process.env,
     });
     expect(output).toEqual(mockStdout);
   });

@@ -31,24 +31,21 @@ describe('pdm Executor', () => {
   });
 
   it('should call pdm with the command and project root', async () => {
-    const options: pdmExecutorSchema = { command: 'install', raw: false };
+    const options: pdmExecutorSchema = { command: 'install' };
     await runpdm(options, mockContext);
     expect(mockpdm).toHaveBeenCalledWith('install', {
       cwd: '/path/to/project',
-      raw: false,
     });
   });
 
   it('should call pdm with the provided cwd if specified', async () => {
     const options: pdmExecutorSchema = {
       command: 'run',
-      cwd: '/path/to/cwd',
-      raw: false,
+      cwd: '/path/to/cwd'
     };
     await runpdm(options, mockContext);
     expect(mockpdm).toHaveBeenCalledWith('run', {
       cwd: '/path/to/cwd',
-      raw: false,
     });
   });
 
@@ -63,7 +60,7 @@ describe('pdm Executor', () => {
 
   it('should return an object with "success" set to true if pdm succeeds', async () => {
     mockpdm.mockResolvedValueOnce('pdm output');
-    const options: pdmExecutorSchema = { command: 'install', raw: false };
+    const options: pdmExecutorSchema = { command: 'install' };
     const result = await runpdm(options, mockContext);
     expect(result.success).toBe(true);
   });
@@ -74,7 +71,7 @@ describe('pdm Executor', () => {
 
     const error = new Error('pdm error');
     mockpdm.mockRejectedValueOnce(error);
-    const options: pdmExecutorSchema = { command: 'install', raw: false };
+    const options: pdmExecutorSchema = { command: 'install' };
     const result = await runpdm(options, mockContext);
     expect(result.success).toBe(false);
     expect(mockConsoleError).toHaveBeenCalledWith(error);
