@@ -9,6 +9,9 @@ import {
   joinPathFragments,
   ProjectType,
 } from '@nx/devkit';
+import { readFileSync, writeFileSync } from 'fs';
+import * as toml from 'toml';
+import tomlify from 'tomlify';
 import { BuildBackend, PythonGeneratorSchema } from './schema';
 import { pdm } from '../../pdm/pdm';
 
@@ -29,7 +32,7 @@ const normalizeOptions = (
 
   const generatedNames = names(name);
   const projectDirectory = directory
-    ? `${names(directory).fileName}/${generatedNames.fileName}`
+    ? joinPathFragments(directory, generatedNames.fileName)
     : generatedNames.fileName;
   const projectName = projectDirectory.replace(/\//g, '-');
   const projectRoot = `${
@@ -108,6 +111,16 @@ export async function pythonGenerator(
     await pdm(pdmInitCommand(projectType, buildBackend), {
       cwd,
     });
+
+    // Update pyproject.toml to add name and version to allow build
+    const tomlPath = `${cwd}/pyproject.toml`;
+    const pyprojectContent = readFileSync(tomlPath);
+    const tomlObj = toml.parse(pyprojectContent.toString());
+    tomlObj.project.name = projectName;
+    tomlObj.project.version = '0.0.1';
+    const modifiedTomlContent = tomlify(tomlObj, {});
+    writeFileSync(tomlPath, modifiedTomlContent);
+
     await formatFiles(tree);
   };
 }

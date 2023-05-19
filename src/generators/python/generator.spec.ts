@@ -1,5 +1,6 @@
 import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing';
 import { Tree, joinPathFragments, readProjectConfiguration } from '@nx/devkit';
+import { writeFileSync, PathOrFileDescriptor, WriteFileOptions } from 'fs';
 
 import { pythonGenerator, pdmInitCommand } from './generator';
 import { PythonGeneratorSchema } from './schema';
@@ -10,7 +11,43 @@ jest.mock('../../pdm/pdm', () => ({
   pdm: jest.fn(() => Promise.resolve('pdm output')),
 }));
 
+jest.mock('fs', () => {
+  const mod = jest.requireActual('fs');
+  return {
+    ...mod,
+    readFileSync: jest.fn(
+      (
+        path: PathOrFileDescriptor,
+        options?: {
+          encoding?: null | undefined;
+          flag?: string | undefined;
+        } | null
+      ) => {
+        if (path.toString().includes('pyproject.toml')) {
+          return '[project]\nname = ""\nversion = ""';
+        } else {
+          return mod.readFileSync(path, options);
+        }
+      }
+    ),
+    writeFileSync: jest.fn(
+      (
+        file: PathOrFileDescriptor,
+        data: string | NodeJS.ArrayBufferView,
+        options?: WriteFileOptions
+      ) => {
+        if (file.toString().includes('pyproject.toml')) {
+          return;
+        } else {
+          return mod.writeFileSync(file, data, options);
+        }
+      }
+    ),
+  };
+});
+
 const mockPdm = jest.mocked(pdm);
+const mockWriteFileSync = jest.mocked(writeFileSync);
 
 describe('python generator', () => {
   let tree: Tree;
@@ -37,9 +74,15 @@ describe('python generator', () => {
     const outputFn = await pythonGenerator(tree, options);
     await outputFn();
     const cwd = joinPathFragments(process.cwd(), options.name);
+    // Inits PDM
     expect(mockPdm).toBeCalledWith('rm pyproject.toml', { cwd, raw: true });
     expect(mockPdm).toBeCalledWith(pdmInitCommand(options.projectType), {
       cwd,
     });
+    // Updates project name and version
+    expect(mockWriteFileSync).toBeCalledWith(
+      joinPathFragments(cwd, 'pyproject.toml'),
+      `[project]\nname = "${options.name}"\nversion = "0.0.1"`
+    );
   });
 });
