@@ -5,14 +5,8 @@ import {
 } from "@nx/plugin/testing";
 
 describe("python generator", () => {
-  // Setting up individual workspaces per
-  // test can cause e2e runs to take a long time.
-  // For this reason, we recommend each suite only
-  // consumes 1 workspace. The tests should each operate
-  // on a unique project in the workspace, such that they
-  // are not dependant on one another.
   beforeAll(() => {
-    ensureNxProject("nx-python-pdm", "dist/./.");
+    ensureNxProject("nx-python-pdm", "dist/nx-python-pdm");
   });
 
   afterAll(async () => {
@@ -23,8 +17,8 @@ describe("python generator", () => {
 
   it("should be able to generated project files", async () => {
     const name = "generate-proj";
-    const baseDir = `app/${name}/`;
-    await runNxCommandAsync(`generate nx-python-pdm:python --name ${name}`);
-    expect(() => checkFilesExist(...['main.py', 'Pipfile', 'Pipfile.lock'].map((el) => `${baseDir}/${el}`))).not.toThrow();
+    const baseDir = `apps/${name}`;
+    await runNxCommandAsync(`generate nx-python-pdm:python --name ${name} --no-interactive`);
+    expect(() => checkFilesExist(...['main.py', 'pyproject.toml'].map((el) => `${baseDir}/${el}`))).not.toThrow();
   });
 });
