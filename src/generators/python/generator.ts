@@ -10,8 +10,6 @@ import {
   ProjectType,
 } from '@nx/devkit';
 import { readFileSync, writeFileSync } from 'fs';
-import * as toml from 'toml';
-import tomlify from 'tomlify';
 import { BuildBackend, PythonGeneratorSchema } from './schema';
 import { pdm } from '../../pdm/pdm';
 
@@ -104,24 +102,27 @@ export async function pythonGenerator(
     options
   );
 
-  return async () => {
-    const cwd = joinPathFragments(process.cwd(), projectRoot);
+  const cwd = joinPathFragments(tree.root, projectRoot);
+  const tomlPath = joinPathFragments(cwd, 'pyproject.toml');
+  if (process.env.NX_DRY_RUN === 'true') {
+    tree.write(tomlPath, '');
+    tree.write(joinPathFragments(projectRoot, '.gitignore'), '');
+  }
+  await formatFiles(tree);
 
-    await pdm('rm pyproject.toml', { cwd, raw: true });
+  return async () => {
     await pdm(pdmInitCommand(projectType, buildBackend), {
       cwd,
     });
 
-    // Update pyproject.toml to add name and version to allow build
-    const tomlPath = `${cwd}/pyproject.toml`;
-    const pyprojectContent = readFileSync(tomlPath);
-    const tomlObj = toml.parse(pyprojectContent.toString());
-    tomlObj.project.name = projectName;
-    tomlObj.project.version = '0.0.1';
-    const modifiedTomlContent = tomlify(tomlObj, {});
-    writeFileSync(tomlPath, modifiedTomlContent);
-
-    await formatFiles(tree);
+    // Add project name and version as the minimum needed to build
+    const pyprojectContent = readFileSync(tomlPath)
+      .toString()
+      // Add the project name
+      .replace(/(\bname\s?=\s?)("")/g, `$1"${projectName}"`)
+      // Add the version
+      .replace(/(\bversion\s?=\s?)("")/g, '$1"0.0.1"');
+    writeFileSync(tomlPath, pyprojectContent);
   };
 }
 

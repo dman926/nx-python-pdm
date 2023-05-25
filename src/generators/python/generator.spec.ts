@@ -24,7 +24,7 @@ jest.mock('fs', () => {
         } | null
       ) => {
         if (path.toString().includes('pyproject.toml')) {
-          return '[project]\nname = ""\nversion = ""';
+          return '[tool.pdm]\n\n[project]\nname = ""\nversion = ""\ndescription = ""\n';
         } else {
           return mod.readFileSync(path, options);
         }
@@ -55,6 +55,8 @@ describe('python generator', () => {
     name: 'test',
     projectType: 'application',
   };
+  const expectedPyprojectToml = `[tool.pdm]\n\n[project]\nname = "${options.name}"\nversion = "0.0.1"\ndescription = ""\n`;
+  const cwd = '/virtual/test';
 
   beforeEach(() => {
     tree = createTreeWithEmptyWorkspace();
@@ -73,16 +75,14 @@ describe('python generator', () => {
   it('should return a function that configures pdm', async () => {
     const outputFn = await pythonGenerator(tree, options);
     await outputFn();
-    const cwd = joinPathFragments(process.cwd(), options.name);
     // Inits PDM
-    expect(mockPdm).toBeCalledWith('rm pyproject.toml', { cwd, raw: true });
     expect(mockPdm).toBeCalledWith(pdmInitCommand(options.projectType), {
       cwd,
     });
     // Updates project name and version
     expect(mockWriteFileSync).toBeCalledWith(
       joinPathFragments(cwd, 'pyproject.toml'),
-      `[project]\nname = "${options.name}"\nversion = "0.0.1"`
+      expectedPyprojectToml
     );
   });
 });

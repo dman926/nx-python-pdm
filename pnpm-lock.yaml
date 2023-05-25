@@ -7,12 +7,6 @@ dependencies:
   '@swc/helpers':
     specifier: ~0.5.1
     version: 0.5.1
-  toml:
-    specifier: ^3.0.0
-    version: 3.0.0
-  tomlify:
-    specifier: ^0.2.2
-    version: 0.2.2
   tslib:
     specifier: ^2.5.2
     version: 2.5.2
@@ -5663,14 +5657,6 @@ packages:
       '@tokenizer/token': 0.3.0
       ieee754: 1.2.1
     dev: true
-
-  /toml@3.0.0:
-    resolution: {integrity: sha512-y/mWCZinnvxjTKYhJ+pYxwD0mRLVvOtdS2Awbgxln6iEnt4rk0yBxeSBHkGJcPucRiG0e55mwWp+g/05rsrd6w==}
-    dev: false
-
-  /tomlify@0.2.2:
-    resolution: {integrity: sha512-c9ECstcvhMdpKXU2w9A+pydH3g/OtuOQJsZth3tarY7bqljNB5a/k4D7+0hd60AXJwLKU8h26AYq3q2z/OdLnA==}
-    dev: false
 
   /tough-cookie@4.1.2:
     resolution: {integrity: sha512-G9fqXWoYFZgTc2z8Q5zaHy/vJMjm+WV0AkAeHxVCQiEB1b+dGvWzFW6QV07cY5jQ5gRkeid2qIkzkxUnmoQZUQ==}

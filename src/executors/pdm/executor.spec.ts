@@ -59,7 +59,7 @@ describe('pdm Executor', () => {
   });
 
   it('should return an object with "success" set to true if pdm succeeds', async () => {
-    mockpdm.mockResolvedValueOnce('pdm output');
+    mockpdm.mockResolvedValueOnce({ stdout: 'pdm output', stderr: '' });
     const options: pdmExecutorSchema = { command: 'install' };
     const result = await runpdm(options, mockContext);
     expect(result.success).toBe(true);

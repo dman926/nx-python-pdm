@@ -6,8 +6,6 @@
   "dependencies": {
     "@nx/devkit": "16.2.1",
     "@swc/helpers": "~0.5.1",
-    "toml": "^3.0.0",
-    "tomlify": "^0.2.2",
     "tslib": "^2.5.2"
   },
   "devDependencies": {

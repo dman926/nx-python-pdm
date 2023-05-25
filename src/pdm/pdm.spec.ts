@@ -12,26 +12,23 @@ const mockPromisify = jest.mocked(promisify);
 const mockStdout = 'mocked stdout';
 const mockStderr = 'mocked stderr';
 
-const success = jest.fn(() =>
-  Promise.resolve({
-    stdout: mockStdout,
-    stderr: null,
-  })
-);
+const success = {
+  stdout: mockStdout,
+  stderr: '',
+};
+const successP = jest.fn(() => Promise.resolve(success));
 
-const fail1 = jest.fn(() =>
-  Promise.resolve({
-    stdout: null,
-    stderr: mockStderr,
-  })
-);
+const fail1 = {
+  stdout: '',
+  stderr: mockStderr,
+};
+const fail1P = jest.fn(() => Promise.resolve(fail1));
 
-const fail2 = jest.fn(() =>
-  Promise.resolve({
-    stdout: mockStdout,
-    stderr: mockStderr,
-  })
-);
+const fail2 = {
+  stdout: mockStdout,
+  stderr: mockStderr,
+};
+const fail2P = jest.fn(() => Promise.resolve(fail2));
 
 describe('pdm', () => {
   afterEach(() => {
@@ -39,73 +36,79 @@ describe('pdm', () => {
   });
 
   it('should promisify exec and call the resulting function', async () => {
-    mockPromisify.mockImplementationOnce(() => success);
+    mockPromisify.mockImplementationOnce(() => successP);
 
     await pdm('version');
     expect(mockPromisify).toHaveBeenCalledWith(exec);
-    expect(success).toHaveBeenCalled();
+    expect(successP).toHaveBeenCalled();
   });
 
   it('should execute a pdm command with processEnv option', async () => {
     // Mock the exec function to return a promise that resolves with mocked stdout and an empty stderr.
-    mockPromisify.mockImplementationOnce(() => success);
+    mockPromisify.mockImplementationOnce(() => successP);
 
     const output = await pdm('version');
-    expect(success).toHaveBeenCalledWith('pdm version', {
+    expect(successP).toHaveBeenCalledWith('pdm version', {
       maxBuffer: LARGE_BUFFER,
       env: process.env,
     });
-    expect(output).toEqual(mockStdout);
+    expect(output).toEqual(success);
   });
 
   it('should execute a pdm command with cwd option and return its stdout', async () => {
     // Mock the exec function to return a promise that resolves with mocked stdout and an empty stderr.
     const mockCwd = '/home/user/project';
-    mockPromisify.mockImplementationOnce(() => success);
+    mockPromisify.mockImplementationOnce(() => successP);
 
     const output = await pdm('version', { cwd: mockCwd });
-    expect(success).toHaveBeenCalledWith('pdm version', {
+    expect(successP).toHaveBeenCalledWith('pdm version', {
       maxBuffer: LARGE_BUFFER,
       env: process.env,
       cwd: mockCwd,
     });
-    expect(output).toEqual(mockStdout);
+    expect(output).toEqual(success);
   });
 
   it('should execute a pdm command with cwd option and return its stdout (raw)', async () => {
     // Mock the exec function to return a promise that resolves with mocked stdout and an empty stderr.
     const mockCwd = '/home/user/project';
-    mockPromisify.mockImplementationOnce(() => success);
+    mockPromisify.mockImplementationOnce(() => successP);
 
     const output = await pdm('version', { cwd: mockCwd, raw: true });
-    expect(success).toHaveBeenCalledWith('version', {
+    expect(successP).toHaveBeenCalledWith('version', {
       maxBuffer: LARGE_BUFFER,
       env: process.env,
       cwd: mockCwd,
     });
-    expect(output).toEqual(mockStdout);
+    expect(output).toEqual(success);
   });
 
   it('should execute a command without the "pdm" prefix if the "raw" option is set', async () => {
     // Mock the exec function to return a promise that resolves with mocked stdout and an empty stderr.
-    mockPromisify.mockImplementationOnce(() => success);
+    mockPromisify.mockImplementationOnce(() => successP);
 
     const output = await pdm('version', { raw: true });
-    expect(success).toHaveBeenCalledWith('version', {
+    expect(successP).toHaveBeenCalledWith('version', {
       maxBuffer: LARGE_BUFFER,
       env: process.env,
     });
-    expect(output).toEqual(mockStdout);
+    expect(output).toEqual(success);
   });
 
-  it('should throw an error if the executed command has non-empty stderr', async () => {
+  it('should output non-empty stderr if stderr is generated', async () => {
     // Mock the exec function to return a promise that resolves with mocked stdout and stderr.
-    for (const returnFunc of [fail1, fail2]) {
+    for (const { returnFunc, returnVal } of [
+      { returnFunc: fail1P, returnVal: fail1 },
+      { returnFunc: fail2P, returnVal: fail2 },
+    ]) {
       mockPromisify.mockImplementationOnce(() => returnFunc);
 
-      await expect(pdm('non-existent-command')).rejects.toThrowError(
-        mockStderr
-      );
+      const output = await pdm('non-existent-command');
+      expect(returnFunc).toBeCalledWith('pdm non-existent-command', {
+        maxBuffer: LARGE_BUFFER,
+        env: process.env,
+      });
+      expect(output).toEqual(returnVal);
     }
   });
 });

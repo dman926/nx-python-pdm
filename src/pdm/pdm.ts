@@ -8,6 +8,11 @@ export interface PdmOptions {
   raw: boolean;
 }
 
+export interface PdmOutput {
+  stdout: string;
+  stderr: string;
+}
+
 /**
  * Executes the given command using pdm and returns a promise that
  * resolves with the command's output. If `cwd` is provided, the command
@@ -22,16 +27,14 @@ export interface PdmOptions {
 export const pdm = (
   command: string,
   { cwd, raw }: Partial<PdmOptions> = {}
-): Promise<string> =>
+): Promise<PdmOutput> =>
   promisify(exec)(`${raw ? '' : 'pdm '}${command}`, {
     maxBuffer: LARGE_BUFFER,
     env: process.env,
     cwd,
-  }).then(({ stdout, stderr }) => {
-    if (stderr) {
-      throw new Error(stderr);
-    }
-    return stdout.trim();
-  });
+  }).then(({ stdout, stderr }) => ({
+    stdout: stdout.trim(),
+    stderr: stderr.trim(),
+  }));
 
 export default pdm;
