@@ -11,6 +11,7 @@ import {
 } from '@nx/devkit';
 import { readFileSync, writeFileSync, rmSync } from 'fs';
 import { BuildBackend, PythonGeneratorSchema } from './schema';
+import { dummyFiles } from './dummyFiles';
 import { pdm } from '../../pdm/pdm';
 
 interface NormalizedOptions extends PythonGeneratorSchema {
@@ -102,8 +103,6 @@ export async function pythonGenerator(
     options
   );
 
-  // if (process.env.NX_DRY_RUN === 'true') {
-  const dummyFiles = ['pyproject.toml', '.venv', '.pdm-python', '.gitignore'];
   dummyFiles.forEach((dummyFile) => {
     tree.write(joinPathFragments(projectRoot, dummyFile), '');
   })

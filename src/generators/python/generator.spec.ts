@@ -1,6 +1,12 @@
 import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing';
 import { Tree, joinPathFragments, readProjectConfiguration } from '@nx/devkit';
-import { writeFileSync, PathOrFileDescriptor, WriteFileOptions } from 'fs';
+import {
+  writeFileSync,
+  PathOrFileDescriptor,
+  WriteFileOptions,
+  PathLike,
+  RmOptions,
+} from 'fs';
 
 import { pythonGenerator, pdmInitCommand } from './generator';
 import { PythonGeneratorSchema } from './schema';
@@ -13,6 +19,8 @@ jest.mock('../../pdm/pdm', () => ({
 
 jest.mock('fs', () => {
   const mod = jest.requireActual('fs');
+  const basename = jest.requireActual('path').basename;
+  const dummyFiles = jest.requireActual('./dummyFiles').dummyFiles;
   return {
     ...mod,
     readFileSync: jest.fn(
@@ -23,7 +31,8 @@ jest.mock('fs', () => {
           flag?: string | undefined;
         } | null
       ) => {
-        if (path.toString().includes('pyproject.toml')) {
+        const filename = basename(path.toString());
+        if (dummyFiles.includes(filename)) {
           return '[tool.pdm]\n\n[project]\nname = ""\nversion = ""\ndescription = ""\n';
         } else {
           return mod.readFileSync(path, options);
@@ -36,13 +45,22 @@ jest.mock('fs', () => {
         data: string | NodeJS.ArrayBufferView,
         options?: WriteFileOptions
       ) => {
-        if (file.toString().includes('pyproject.toml')) {
+        const filename = basename(file.toString());
+        if (dummyFiles.includes(filename)) {
           return;
         } else {
           return mod.writeFileSync(file, data, options);
         }
       }
     ),
+    rmSync: jest.fn((path: PathLike, options?: RmOptions) => {
+      const filename = basename(path.toString());
+      if (dummyFiles.includes(filename)) {
+        return;
+      } else {
+        return mod.rmSync(path, options);
+      }
+    }),
   };
 });
 
@@ -55,7 +73,7 @@ describe('python generator', () => {
     name: 'test',
     projectType: 'application',
   };
-  const expectedPyprojectToml = `[tool.pdm]\n\n[project]\nname = "${options.name}"\nversion = "0.0.1"\ndescription = ""\n`;
+  const expectedPyprojectToml = `[tool.pdm]\n\n[project]\nname = "${options.name}"\nversion = "0.1.0"\ndescription = ""\n`;
   const cwd = '/virtual/test';
 
   beforeEach(() => {
