@@ -25,12 +25,7 @@
     "buildBackend": {
       "type": "string",
       "description": "Override the default build backend.",
-      "enum": [
-        "pdm-backend",
-        "setuptools",
-        "flot",
-        "hatchling"
-      ]
+      "enum": ["pdm-backend", "setuptools", "flot", "hatchling"]
     },
     "directory": {
       "type": "string",

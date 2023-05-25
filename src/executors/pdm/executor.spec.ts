@@ -41,7 +41,7 @@ describe('pdm Executor', () => {
   it('should call pdm with the provided cwd if specified', async () => {
     const options: pdmExecutorSchema = {
       command: 'run',
-      cwd: '/path/to/cwd'
+      cwd: '/path/to/cwd',
     };
     await runpdm(options, mockContext);
     expect(mockpdm).toHaveBeenCalledWith('run', {

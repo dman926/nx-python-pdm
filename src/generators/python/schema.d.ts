@@ -1,6 +1,6 @@
 import type { ProjectType } from '@nx/devkit';
 
-type BuildBackend = "pdm-backend" | "setuptools" | "flot" | "hatchling";
+type BuildBackend = 'pdm-backend' | 'setuptools' | 'flot' | 'hatchling';
 
 export interface PythonGeneratorSchema {
   name: string;

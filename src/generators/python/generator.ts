@@ -105,13 +105,13 @@ export async function pythonGenerator(
 
   dummyFiles.forEach((dummyFile) => {
     tree.write(joinPathFragments(projectRoot, dummyFile), '');
-  })
+  });
   tree.write(joinPathFragments(projectRoot, '.venv'), '');
   tree.write(joinPathFragments(projectRoot, '.pdm-python'), '');
   tree.write(joinPathFragments(projectRoot, '.gitignore'), '');
 
   await formatFiles(tree);
-  
+
   return async () => {
     const cwd = joinPathFragments(tree.root, projectRoot);
     dummyFiles.forEach((dummyFile) => {
@@ -121,7 +121,7 @@ export async function pythonGenerator(
     await pdm(pdmInitCommand(projectType, buildBackend), {
       cwd,
     });
-    
+
     // Add project name and version as the minimum needed to build
     // PDM automatically gives these values for libraries, but applications do not for some reason
     const tomlPath = joinPathFragments(cwd, 'pyproject.toml');
