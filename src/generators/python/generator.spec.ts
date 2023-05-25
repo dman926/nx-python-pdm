@@ -33,7 +33,7 @@ jest.mock('fs', () => {
       ) => {
         const filename = basename(path.toString());
         if (dummyFiles.includes(filename)) {
-          return '[tool.pdm]\n\n[project]\nname = ""\nversion = ""\ndescription = ""\n';
+          return '[tool.pdm]\n\n[project]\nname = ""\nversion = ""\ndescription = ""\nauthors = []\n';
         } else {
           return mod.readFileSync(path, options);
         }
@@ -73,7 +73,7 @@ describe('python generator', () => {
     name: 'test',
     projectType: 'application',
   };
-  const expectedPyprojectToml = `[tool.pdm]\n\n[project]\nname = "${options.name}"\nversion = "0.1.0"\ndescription = ""\n`;
+  const expectedPyprojectToml = `[tool.pdm]\n\n[project]\nname = "${options.name}"\nversion = "0.1.0"\ndescription = ""\nauthors = [\n    {name = "Your Name", email = "your@email.com"},\n]\n`;
   const cwd = '/virtual/test';
 
   beforeEach(() => {

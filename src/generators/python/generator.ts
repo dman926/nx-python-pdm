@@ -122,15 +122,20 @@ export async function pythonGenerator(
       cwd,
     });
 
-    // Add project name and version as the minimum needed to build
-    // PDM automatically gives these values for libraries, but applications do not for some reason
+    // Add project name, version, and authors as the minimum needed to build
+    // PDM automatically gives project name and version for libraries, but applications do not for some reason
     const tomlPath = joinPathFragments(cwd, 'pyproject.toml');
     const pyprojectContent = readFileSync(tomlPath)
       .toString()
       // Add the project name
       .replace(/(\bname\s?=\s?)("")/g, `$1"${projectName}"`)
       // Add the version
-      .replace(/(\bversion\s?=\s?)("")/g, '$1"0.1.0"');
+      .replace(/(\bversion\s?=\s?)("")/g, '$1"0.1.0"')
+      // Add the authors
+      .replace(
+        /(\bauthors\s?=\s?)(\[\])/g,
+        '$1[\n    {name = "Your Name", email = "your@email.com"},\n]'
+      );
     writeFileSync(tomlPath, pyprojectContent);
   };
 }
