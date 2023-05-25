@@ -5,13 +5,14 @@
   "sourceRoot": "e2e/tests",
   "targets": {
     "e2e": {
-      "executor": "@nx/plugin:e2e",
+      "executor": "@nx/jest:jest",
       "options": {
-        "target": "nx-pipenv:build",
         "jestConfig": "e2e/jest.config.ts",
         "codeCoverage": true,
-        "coverageDirectory": "coverage/e2e"
-      }
+        "coverageDirectory": "coverage/e2e",
+        "runInBand": true
+      },
+      "dependsOn": ["nx-python-pdm:build"]
     },
     "lint": {
       "executor": "@nx/linter:eslint",
@@ -22,5 +23,5 @@
     }
   },
   "tags": [],
-  "implicitDependencies": ["nx-pipenv"]
+  "implicitDependencies": ["nx-python-pdm"]
 }

@@ -1,11 +1,11 @@
-# nx-pipenv
+# nx-python-pdm
 
 This library was generated with [Nx](https://nx.dev).
 
 ## Building
 
-Run `nx build nx-pipenv` to build the library.
+Run `nx build nx-python-pdm` to build the library.
 
 ## Running unit tests
 
-Run `nx test nx-pipenv` to execute the unit tests via [Jest](https://jestjs.io).
+Run `nx test nx-python-pdm` to execute the unit tests via [Jest](https://jestjs.io).

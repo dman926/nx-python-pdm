@@ -3,7 +3,7 @@
     "python": {
       "factory": "./src/generators/python/generator",
       "schema": "./src/generators/python/schema.json",
-      "description": "Generate a generic python application or library powered by pipenv"
+      "description": "Generate a generic python application or library powered by pdm"
     }
   }
 }

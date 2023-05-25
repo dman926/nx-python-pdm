@@ -4,11 +4,11 @@
   "title": "Python project generator",
   "cli": "nx",
   "type": "object",
-  "description": "Generate a generic python application or library powered by pipenv",
+  "description": "Generate a generic python application or library powered by pdm",
   "properties": {
     "name": {
       "type": "string",
-      "description": "",
+      "description": "Name of the project.",
       "$default": {
         "$source": "argv",
         "index": 0
@@ -17,9 +17,15 @@
     },
     "projectType": {
       "type": "string",
-      "description": "Is this an application or library?",
+      "description": "Application or Library.",
       "enum": ["application", "library"],
-      "default": "application"
+      "default": "application",
+      "x-prompt": "Is this an application or library?"
+    },
+    "buildBackend": {
+      "type": "string",
+      "description": "Override the default build backend.",
+      "enum": ["pdm-backend", "setuptools", "flot", "hatchling"]
     },
     "directory": {
       "type": "string",

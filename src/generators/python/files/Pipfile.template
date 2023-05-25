@@ -1,2 +1,0 @@
-# Dummy file to trigger output in dry runs
-# Pipfile.lock.template is also a dummy file, but comments are not allowed in .lock files with the NX linter

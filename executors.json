@@ -1,9 +1,9 @@
 {
   "executors": {
-    "pipenv": {
-      "implementation": "./src/executors/pipenv/executor",
-      "schema": "./src/executors/pipenv/schema.json",
-      "description": "Run a generic pipenv command in this project"
+    "pdm": {
+      "implementation": "./src/executors/pdm/executor",
+      "schema": "./src/executors/pdm/schema.json",
+      "description": "Run a generic pdm command in this project"
     }
   }
 }

@@ -15,7 +15,7 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "nx-pipenv": ["src/index.ts"]
+      "nx-python-pdm": ["src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

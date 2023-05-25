@@ -7,9 +7,12 @@ import {
   Tree,
   offsetFromRoot,
   joinPathFragments,
+  ProjectType,
 } from '@nx/devkit';
-import { PythonGeneratorSchema } from './schema';
-import { pipenv } from '../../pipenv/pipenv';
+import { readFileSync, writeFileSync, rmSync } from 'fs';
+import { BuildBackend, PythonGeneratorSchema } from './schema';
+import { dummyFiles } from './dummyFiles';
+import { pdm } from '../../pdm/pdm';
 
 interface NormalizedOptions extends PythonGeneratorSchema {
   projectName: string;
@@ -28,7 +31,7 @@ const normalizeOptions = (
 
   const generatedNames = names(name);
   const projectDirectory = directory
-    ? `${names(directory).fileName}/${generatedNames.fileName}`
+    ? joinPathFragments(directory, generatedNames.fileName)
     : generatedNames.fileName;
   const projectName = projectDirectory.replace(/\//g, '-');
   const projectRoot = `${
@@ -46,9 +49,27 @@ const normalizeOptions = (
   };
 };
 
-export default async function (tree: Tree, options: PythonGeneratorSchema) {
+export const pdmInitCommand = (
+  projectType: ProjectType,
+  buildBackend?: BuildBackend
+) => {
+  let pdmInitCommand = 'init --non-interactive';
+  if (projectType === 'library') {
+    pdmInitCommand += ' --lib';
+  }
+  if (buildBackend) {
+    pdmInitCommand += ` --backend=${buildBackend}`;
+  }
+  return pdmInitCommand;
+};
+
+export async function pythonGenerator(
+  tree: Tree,
+  options: PythonGeneratorSchema
+) {
   const normalizedOptions = normalizeOptions(tree, options);
   const {
+    buildBackend,
     parsedTags,
     projectDirectory,
     projectName,
@@ -62,20 +83,14 @@ export default async function (tree: Tree, options: PythonGeneratorSchema) {
     sourceRoot: projectRoot,
     targets: {
       build: {
-        executor: 'nx-pipenv:pipenv',
+        executor: 'nx-python-pdm:pdm',
         dependsOn: ['sync'],
         options: {
-          command: `run python setup.py bdist_wheel --bdist-dir=${rootOffset}build/${projectDirectory}`,
+          command: `build --dest=${rootOffset}build/${projectDirectory}`,
         },
       },
-      sync: {
-        executor: 'nx-pipenv:pipenv',
-        options: {
-          command: 'run pipenv-setup sync',
-        },
-      },
-      pipenv: {
-        executor: 'nx-pipenv:pipenv',
+      pdm: {
+        executor: 'nx-python-pdm:pdm',
       },
     },
     tags: parsedTags,
@@ -88,12 +103,41 @@ export default async function (tree: Tree, options: PythonGeneratorSchema) {
     options
   );
 
+  dummyFiles.forEach((dummyFile) => {
+    tree.write(joinPathFragments(projectRoot, dummyFile), '');
+  });
+  tree.write(joinPathFragments(projectRoot, '.venv'), '');
+  tree.write(joinPathFragments(projectRoot, '.pdm-python'), '');
+  tree.write(joinPathFragments(projectRoot, '.gitignore'), '');
+
+  await formatFiles(tree);
+
   return async () => {
-    const cwd = joinPathFragments(process.cwd(), projectRoot);
-    await pipenv('rm Pipfile Pipfile.lock', { cwd, raw: true });
-    await pipenv('install --dev wheel setuptools pipenv-setup', {
+    const cwd = joinPathFragments(tree.root, projectRoot);
+    dummyFiles.forEach((dummyFile) => {
+      rmSync(joinPathFragments(cwd, dummyFile));
+    });
+
+    await pdm(pdmInitCommand(projectType, buildBackend), {
       cwd,
     });
-    await formatFiles(tree);
+
+    // Add project name, version, and authors as the minimum needed to build
+    // PDM automatically gives project name and version for libraries, but applications do not for some reason
+    const tomlPath = joinPathFragments(cwd, 'pyproject.toml');
+    const pyprojectContent = readFileSync(tomlPath)
+      .toString()
+      // Add the project name
+      .replace(/(^name\s*=\s*)("")/gm, `$1"${projectName}"`)
+      // Add the version
+      .replace(/(^version\s*=\s*)("")/gm, '$1"0.1.0"')
+      // Add the authors
+      .replace(
+        /(^authors\s*=\s*)(\[\s*\{name\s*=\s*"", email\s*=\s*""\},\s*\])/gm,
+        '$1[\n    {name = "Your Name", email = "your@email.com"},\n]'
+      );
+    writeFileSync(tomlPath, pyprojectContent);
   };
 }
+
+export default pythonGenerator;
