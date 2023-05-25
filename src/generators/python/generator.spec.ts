@@ -33,7 +33,7 @@ jest.mock('fs', () => {
       ) => {
         const filename = basename(path.toString());
         if (dummyFiles.includes(filename)) {
-          return '[tool.pdm]\n\n[project]\nname = ""\nversion = ""\ndescription = ""\nauthors = []\n';
+          return '[tool.pdm]\n\n[project]\nname = ""\nversion = ""\ndescription = ""\nauthors = [\n    {name = "", email = ""},\n]\n';
         } else {
           return mod.readFileSync(path, options);
         }

@@ -128,12 +128,12 @@ export async function pythonGenerator(
     const pyprojectContent = readFileSync(tomlPath)
       .toString()
       // Add the project name
-      .replace(/(\bname\s?=\s?)("")/g, `$1"${projectName}"`)
+      .replace(/(^name\s*=\s*)("")/gm, `$1"${projectName}"`)
       // Add the version
-      .replace(/(\bversion\s?=\s?)("")/g, '$1"0.1.0"')
+      .replace(/(^version\s*=\s*)("")/gm, '$1"0.1.0"')
       // Add the authors
       .replace(
-        /(\bauthors\s?=\s?)(\[\])/g,
+        /(^authors\s*=\s*)(\[\s*\{name\s*=\s*"", email\s*=\s*""\},\s*\])/gm,
         '$1[\n    {name = "Your Name", email = "your@email.com"},\n]'
       );
     writeFileSync(tomlPath, pyprojectContent);
