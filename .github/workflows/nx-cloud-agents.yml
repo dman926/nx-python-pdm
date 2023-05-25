@@ -27,7 +27,7 @@ on:
         type: string
       init-commands:
         required: false
-        type: string  
+        type: string
       runs-on:
         required: false
         type: string
