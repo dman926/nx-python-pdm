@@ -9,7 +9,7 @@ import {
   joinPathFragments,
   ProjectType,
 } from '@nx/devkit';
-import { readFileSync, writeFileSync } from 'fs';
+import { readFileSync, writeFileSync, rmSync } from 'fs';
 import { BuildBackend, PythonGeneratorSchema } from './schema';
 import { pdm } from '../../pdm/pdm';
 
@@ -102,26 +102,36 @@ export async function pythonGenerator(
     options
   );
 
-  const cwd = joinPathFragments(tree.root, projectRoot);
-  const tomlPath = joinPathFragments(cwd, 'pyproject.toml');
-  if (process.env.NX_DRY_RUN === 'true') {
-    tree.write(tomlPath, '');
-    tree.write(joinPathFragments(projectRoot, '.gitignore'), '');
-  }
-  await formatFiles(tree);
+  // if (process.env.NX_DRY_RUN === 'true') {
+  const dummyFiles = ['pyproject.toml', '.venv', '.pdm-python', '.gitignore'];
+  dummyFiles.forEach((dummyFile) => {
+    tree.write(joinPathFragments(projectRoot, dummyFile), '');
+  })
+  tree.write(joinPathFragments(projectRoot, '.venv'), '');
+  tree.write(joinPathFragments(projectRoot, '.pdm-python'), '');
+  tree.write(joinPathFragments(projectRoot, '.gitignore'), '');
 
+  await formatFiles(tree);
+  
   return async () => {
+    const cwd = joinPathFragments(tree.root, projectRoot);
+    dummyFiles.forEach((dummyFile) => {
+      rmSync(joinPathFragments(cwd, dummyFile));
+    });
+
     await pdm(pdmInitCommand(projectType, buildBackend), {
       cwd,
     });
-
+    
     // Add project name and version as the minimum needed to build
+    // PDM automatically gives these values for libraries, but applications do not for some reason
+    const tomlPath = joinPathFragments(cwd, 'pyproject.toml');
     const pyprojectContent = readFileSync(tomlPath)
       .toString()
       // Add the project name
       .replace(/(\bname\s?=\s?)("")/g, `$1"${projectName}"`)
       // Add the version
-      .replace(/(\bversion\s?=\s?)("")/g, '$1"0.0.1"');
+      .replace(/(\bversion\s?=\s?)("")/g, '$1"0.1.0"');
     writeFileSync(tomlPath, pyprojectContent);
   };
 }
