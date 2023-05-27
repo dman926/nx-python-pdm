@@ -3,7 +3,7 @@
 [![LICENSE](https://img.shields.io/badge/license-MIT-green)](https://github.com/dman926/nx-python-pdm/blob/main/LICENSE)
 [![CI](https://github.com/dman926/nx-python-pdm/actions/workflows/ci.yml/badge.svg)](https://github.com/dman926/nx-python-pdm/actions/workflows/ci.yml)
 
-Use Python in [NX workspaces](https://nx.dev/) with [PDM](https://pdm.fming.dev/)
+Use Python in NX workspaces with PDM
 
 <!--
 Hidden since it's not published yet.
@@ -16,6 +16,11 @@ pnpm add -D nx-python-pdm
 # npm install -D nx-python-pdm
 ```
 -->
+
+## Prerequisites
+
+- An [NX workspace](https://nx.dev/)
+- [PDM](https://pdm.fming.dev/) must be available to run from the NX workspace.
 
 ## Usage
 
