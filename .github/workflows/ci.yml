@@ -7,10 +7,14 @@ on:
     paths-ignore:
       - .github/**
       - .vscode/**
+      - README.md
+      - LICENSE
   pull_request:
     paths-ignore:
       - .github/**
       - .vscode/**
+      - README.md
+      - LICENSE
   workflow_dispatch:
 
 concurrency:
