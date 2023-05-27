@@ -5,7 +5,7 @@
 
 Use Python in [NX workspaces](https://nx.dev/) with [PDM](https://pdm.fming.dev/)
 
-<p style="display: none">
+<!--
 Hidden since it's not published yet.
 ## Installation
 ```bash
@@ -15,7 +15,7 @@ pnpm add -D nx-python-pdm
 ## Or using npm
 # npm install -D nx-python-pdm
 ```
-</p>
+-->
 
 ## Usage
 
