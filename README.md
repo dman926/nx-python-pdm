@@ -1,6 +1,6 @@
 # nx-python-pdm
 
-[![LICENSE](https://img.shields.io/github/license/dman926/nx-python-pdm)](https://github.com/dman926/nx-python-pdm/LICENSE)
+[![LICENSE](https://img.shields.io/github/license/dman926/nx-python-pdm)](https://github.com/dman926/nx-python-pdm/blob/main/LICENSE)
 [![CI](https://github.com/dman926/nx-python-pdm/actions/workflows/ci.yml/badge.svg)](https://github.com/dman926/nx-python-pdm/actions/workflows/ci.yml)
 
 Use Python in [NX workspaces](https://nx.dev/) with [PDM](https://pdm.fming.dev/)
