@@ -18,16 +18,18 @@ describe('pdm executor', () => {
 
   it('should be able to build generated projects', async () => {
     const name = 'proj';
-    const generator = 'python';
     await runNxCommandAsync(
-      `generate nx-python-pdm:${generator} --name ${name} --no-interactive`
+      `generate nx-python-pdm:python --name ${name} --no-interactive`
     );
+    // NX Daemon is having a hard time picking up new projects.
+    // Give it a nudge.
+    await runNxCommandAsync('reset');
     expect(() => runNxCommand(`build ${name}`)).not.toThrow();
     expect(() =>
-      checkFilesExist(`build/${name}/${name}-0.1.0.tar.gz`)
+      checkFilesExist(`dist/${name}/${name}-0.1.0.tar.gz`)
     ).not.toThrow();
     expect(() =>
-      checkFilesExist(`build/${name}/${name}-0.1.0-py3-none-any.whl`)
+      checkFilesExist(`dist/${name}/${name}-0.1.0-py3-none-any.whl`)
     ).not.toThrow();
   });
 });
