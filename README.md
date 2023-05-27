@@ -22,14 +22,14 @@ pnpm add -D nx-python-pdm
 ### Executors
 
 - pdm - Run a command with PDM on the project
-  - command*: The command to run. 'pdm ' is prepended to this command.
+  - command\*: The command to run. 'pdm ' is prepended to this command.
   - cwd: Override where the command runs. By default, the command runs in the project root.
   - raw: Do not prepend 'pdm ' to the given command.
 
 ### Generators
 
 - python - Create an application or library with PDM
-  - name*: Name of the project.
+  - name\*: Name of the project.
   - projectType: Application or Library. Defaults to "application".
     - application
     - library
