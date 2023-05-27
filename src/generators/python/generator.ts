@@ -84,9 +84,8 @@ export async function pythonGenerator(
     targets: {
       build: {
         executor: 'nx-python-pdm:pdm',
-        dependsOn: ['sync'],
         options: {
-          command: `build --dest=${rootOffset}build/${projectDirectory}`,
+          command: `build --dest=${rootOffset}dist/${projectDirectory}`,
         },
       },
       pdm: {
