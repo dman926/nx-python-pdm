@@ -1,5 +1,9 @@
 import type { ProjectType } from '@nx/devkit';
 
+type Linter = 'none' | 'pylint' | 'flake8' | 'pycodestyle' | 'pylama' | 'mypy';
+type TypeChecker = 'none' | 'mypy' | 'pyright' | 'pyre';
+type UnitTestRunner = 'unittest' | 'pytest' | 'pyre';
+type E2ETestRunner = 'none' | 'cypress' | 'robot';
 type BuildBackend = 'pdm-backend' | 'setuptools' | 'flot' | 'hatchling';
 
 export interface PythonGeneratorSchema {
@@ -7,6 +11,14 @@ export interface PythonGeneratorSchema {
   name: string;
   // Application or Library.
   projectType: ProjectType;
+  // Optionally add and initialize a linter.
+  linter: Linter;
+  // Optionally add and initialize a type checker.
+  typeChecker: TypeChecker;
+  // Optionally add and initialize a unit test runner.
+  unitTestRunner: UnitTestRunner;
+  // Optionally add and initialize an project for an E2E runner.
+  e2eTestRunner: E2ETestRunner;
   // Override the default build backend.
   buildBackend?: BuildBackend;
   // A diretory where the project is placed.

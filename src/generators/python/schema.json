@@ -22,6 +22,34 @@
       "default": "application",
       "x-prompt": "Is this an application or library?"
     },
+    "linter": {
+      "type": "string",
+      "description": "The tool to use for running lint checks.",
+        "enum": ["none", "pylint", "flake8", "pycodestyle", "pylama", "mypy"],
+      "default": "none",
+      "x-prompt": "Optionally add and initialize a linter."
+    },
+    "typeChecker": {
+      "type": "string",
+      "description": "The tool to use for running type checks.",
+      "enum": ["none", "mypy", "pyright", "pyre"],
+      "default": "none",
+      "x-prompt": "Optionally add and initialize a type checker."
+    },
+    "unitTestRunner": {
+      "type": "string",
+      "description": "The tool to use for running unit tests.",
+        "enum": ["unittest", "pytest", "pyre"],
+      "default": "unittest",
+      "x-prompt": "Optionally add and initialize a unit test runner."
+    },
+    "e2eTestRunner": {
+      "type": "string",
+      "description": "The tool to use for running E2E tests.",
+      "enum": ["none", "cypress", "robot"],
+      "default": "none",
+      "x-prompt": "Optionally add and initialize an project for an E2E runner."
+    },
     "buildBackend": {
       "type": "string",
       "description": "Override the default build backend.",
