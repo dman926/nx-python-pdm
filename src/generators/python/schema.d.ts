@@ -1,10 +1,16 @@
 import type { ProjectType } from '@nx/devkit';
 
-type Linter = 'none' | 'pylint' | 'flake8' | 'pycodestyle' | 'pylama' | 'mypy';
-type TypeChecker = 'none' | 'mypy' | 'pyright' | 'pyre';
-type UnitTestRunner = 'unittest' | 'pytest' | 'pyre';
-type E2ETestRunner = 'none' | 'cypress' | 'robot';
-type BuildBackend = 'pdm-backend' | 'setuptools' | 'flot' | 'hatchling';
+export type Linter =
+  | 'none'
+  | 'pylint'
+  | 'flake8'
+  | 'pycodestyle'
+  | 'pylama'
+  | 'mypy';
+export type TypeChecker = 'none' | 'mypy' | 'pyright' | 'pyre';
+export type UnitTestRunner = 'unittest' | 'pytest' | 'pyre';
+export type E2ETestRunner = 'none' | 'cypress' | 'robot';
+export type BuildBackend = 'pdm-backend' | 'setuptools' | 'flot' | 'hatchling';
 
 export interface PythonGeneratorSchema {
   // Name of the project.

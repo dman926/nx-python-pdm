@@ -8,6 +8,7 @@ import {
   offsetFromRoot,
   joinPathFragments,
   ProjectType,
+  TargetConfiguration,
 } from '@nx/devkit';
 import { readFileSync, writeFileSync, rmSync } from 'fs';
 import { BuildBackend, PythonGeneratorSchema } from './schema';
@@ -49,6 +50,82 @@ const normalizeOptions = (
   };
 };
 
+const getTargets = ({
+  rootOffset,
+  projectDirectory,
+  unitTestRunner,
+  linter,
+  typeChecker,
+}: NormalizedOptions) => {
+  const executor = 'nx-python-pdm:pdm';
+  let testCommand;
+  if (unitTestRunner === 'unittest') {
+    testCommand = 'run unittest discover .';
+  } else if (unitTestRunner === 'pytest') {
+    testCommand = 'run pytest';
+  } else if (unitTestRunner === 'pyre') {
+    testCommand = 'run pyre';
+  }
+  const targets: { [targetName: string]: TargetConfiguration<unknown> } = {
+    build: {
+      executor,
+      options: {
+        command: `build --dest=${rootOffset}dist/${projectDirectory}`,
+      },
+    },
+    test: {
+      executor,
+      options: {
+        command: testCommand,
+      },
+    },
+  };
+
+  if (linter && linter !== 'none') {
+    let lintCommand;
+    if (linter === 'pylint') {
+      lintCommand = 'run pylint ./**/*.py';
+    } else if (linter === 'flake8') {
+      lintCommand = 'run flake8';
+    } else if (linter == 'pycodestyle') {
+      lintCommand = 'run pycodestyle ./**/*.py';
+    } else if (linter == 'pylama') {
+      lintCommand = 'run pylama';
+    } else if (linter == 'mypy') {
+      lintCommand = 'run mypy ./**/*.py';
+    }
+    targets.lint = {
+      executor,
+      options: {
+        command: lintCommand,
+      },
+    };
+  }
+
+  if (typeChecker && typeChecker !== 'none') {
+    let typeCheckCommand;
+    if (typeChecker === 'mypy') {
+      typeCheckCommand = 'run mypy ./**/*.py';
+    } else if (typeChecker === 'pyright') {
+      typeCheckCommand = 'run pyright';
+    } else if (typeChecker === 'pyre') {
+      typeCheckCommand = 'run pyre';
+    }
+    targets.typeCheck = {
+      executor,
+      options: {
+        command: typeCheckCommand,
+      },
+    };
+  }
+
+  targets.pdm = {
+    executor,
+  };
+
+  return targets;
+};
+
 export const pdmInitCommand = (
   projectType: ProjectType,
   buildBackend?: BuildBackend
@@ -63,35 +140,41 @@ export const pdmInitCommand = (
   return pdmInitCommand;
 };
 
+export const pdmInstallCommand = ({
+  linter,
+  typeChecker,
+  unitTestRunner,
+}: NormalizedOptions) => {
+  let pdmInstallCommand = `add -d ${unitTestRunner}`;
+  if (
+    linter &&
+    linter !== 'none' &&
+    !pdmInstallCommand.includes(` ${linter}`)
+  ) {
+    pdmInstallCommand += ` ${linter}`;
+  }
+  if (
+    typeChecker &&
+    typeChecker !== 'none' &&
+    !pdmInstallCommand.includes(` ${typeChecker}`)
+  ) {
+    pdmInstallCommand += ` ${typeChecker}`;
+  }
+  return pdmInstallCommand;
+};
+
 export async function pythonGenerator(
   tree: Tree,
   options: PythonGeneratorSchema
 ) {
   const normalizedOptions = normalizeOptions(tree, options);
-  const {
-    buildBackend,
-    parsedTags,
-    projectDirectory,
-    projectName,
-    projectRoot,
-    projectType,
-    rootOffset,
-  } = normalizedOptions;
+  const { buildBackend, parsedTags, projectName, projectRoot, projectType } =
+    normalizedOptions;
   addProjectConfiguration(tree, projectName, {
     root: projectRoot,
     projectType: projectType,
     sourceRoot: projectRoot,
-    targets: {
-      build: {
-        executor: 'nx-python-pdm:pdm',
-        options: {
-          command: `build --dest=${rootOffset}dist/${projectDirectory}`,
-        },
-      },
-      pdm: {
-        executor: 'nx-python-pdm:pdm',
-      },
-    },
+    targets: getTargets(normalizedOptions),
     tags: parsedTags,
   });
 
@@ -136,6 +219,10 @@ export async function pythonGenerator(
         '$1[\n    {name = "Your Name", email = "your@email.com"},\n]'
       );
     writeFileSync(tomlPath, pyprojectContent);
+
+    await pdm(pdmInstallCommand(normalizedOptions), {
+      cwd,
+    });
   };
 }
 

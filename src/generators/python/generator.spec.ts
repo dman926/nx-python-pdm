@@ -9,7 +9,13 @@ import {
 } from 'fs';
 
 import { pythonGenerator, pdmInitCommand } from './generator';
-import { PythonGeneratorSchema } from './schema';
+import {
+  // E2ETestRunner,
+  Linter,
+  PythonGeneratorSchema,
+  TypeChecker,
+  UnitTestRunner,
+} from './schema';
 import { pdm } from '../../pdm/pdm';
 
 // Mock the pdm function
@@ -67,6 +73,31 @@ jest.mock('fs', () => {
 const mockPdm = jest.mocked(pdm);
 const mockWriteFileSync = jest.mocked(writeFileSync);
 
+const linters: { name: Linter; command?: string }[] = [
+  { name: 'none' },
+  { name: 'pylint', command: 'run pylint ./**/*.py' },
+  { name: 'flake8', command: 'run flake8' },
+  { name: 'pycodestyle', command: 'run pycodestyle ./**/*.py' },
+  { name: 'pylama', command: 'run pylama' },
+  { name: 'mypy', command: 'run mypy ./**/*.py' },
+];
+const typeCheckers: { name: TypeChecker; command?: string }[] = [
+  { name: 'none', command: 'run mypy ./**/*.py' },
+  { name: 'mypy', command: 'run mypy' },
+  { name: 'pyright', command: 'run pyright' },
+  { name: 'pyre', command: 'run pyre' },
+];
+const unitTestRunners: { name: UnitTestRunner; command?: string }[] = [
+  { name: 'unittest', command: 'run unittest discover .' },
+  { name: 'pytest', command: 'run pytest' },
+  { name: 'pyre', command: 'run pyre' },
+];
+// const e2eTestRunners: { name: E2ETestRunner; command?: string }[] = [
+//   { name: 'none' },
+//   { name: 'cypress', command: '' },
+//   { name: 'robot', command: '' },
+// ];
+
 describe('python generator', () => {
   let tree: Tree;
   const options: PythonGeneratorSchema = {
@@ -102,5 +133,59 @@ describe('python generator', () => {
       joinPathFragments(cwd, 'pyproject.toml'),
       expectedPyprojectToml
     );
+  });
+
+  it('should add a target for test with the correctly specified unit test runner', async () => {
+    for (const runner of unitTestRunners) {
+      tree = createTreeWithEmptyWorkspace();
+      const optionsWithAdditionalTarget: PythonGeneratorSchema = {
+        ...options,
+        unitTestRunner: runner.name,
+      };
+      await pythonGenerator(tree, optionsWithAdditionalTarget);
+      const config = readProjectConfiguration(tree, 'test');
+      expect(config.targets.test).toBeDefined();
+      expect(config.targets.test.options.command).toContain(runner.command);
+    }
+  });
+
+  it('should add a target for lint with the correctly specified linter', async () => {
+    for (const linter of linters) {
+      tree = createTreeWithEmptyWorkspace();
+      const optionsWithAdditionalTarget: PythonGeneratorSchema = {
+        ...options,
+        linter: linter.name,
+      };
+      await pythonGenerator(tree, optionsWithAdditionalTarget);
+      const config = readProjectConfiguration(tree, 'test');
+      if (linter.name !== 'none') {
+        expect(config.targets.lint).toBeDefined();
+        expect(config.targets.lint.options.command).toContain(linter.command);
+      } else {
+        // When 'none' is specified, no lint target is added
+        expect(config.targets.lint).not.toBeDefined();
+      }
+    }
+  });
+
+  it('should add a target for type checking with the correctly specified type check runner', async () => {
+    for (const runner of typeCheckers) {
+      tree = createTreeWithEmptyWorkspace();
+      const optionsWithAdditionalTarget: PythonGeneratorSchema = {
+        ...options,
+        typeChecker: runner.name,
+      };
+      await pythonGenerator(tree, optionsWithAdditionalTarget);
+      const config = readProjectConfiguration(tree, 'test');
+      if (runner.name !== 'none') {
+        expect(config.targets.typeCheck).toBeDefined();
+        expect(config.targets.typeCheck.options.command).toContain(
+          runner.command
+        );
+      } else {
+        // When 'none' is specified, no typeCheck target is added
+        expect(config.targets.typeCheck).not.toBeDefined();
+      }
+    }
   });
 });
