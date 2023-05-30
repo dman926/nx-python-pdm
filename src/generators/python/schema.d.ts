@@ -11,14 +11,14 @@ export interface PythonGeneratorSchema {
   name: string;
   // Application or Library.
   projectType: ProjectType;
-  // Optionally add and initialize a linter.
-  linter: Linter;
-  // Optionally add and initialize a type checker.
-  typeChecker: TypeChecker;
-  // Optionally add and initialize a unit test runner.
-  unitTestRunner: UnitTestRunner;
-  // Optionally add and initialize an project for an E2E runner.
-  e2eTestRunner: E2ETestRunner;
+  // Optionally add and initialize a linter. Default 'none'
+  linter?: Linter;
+  // Optionally add and initialize a type checker. Default 'none'
+  typeChecker?: TypeChecker;
+  // Optionally add and initialize a unit test runner. Default 'unittest'
+  unitTestRunner?: UnitTestRunner;
+  // Optionally add and initialize an project for an E2E runner. Default 'none'
+  e2eTestRunner?: E2ETestRunner;
   // Override the default build backend.
   buildBackend?: BuildBackend;
   // A diretory where the project is placed.

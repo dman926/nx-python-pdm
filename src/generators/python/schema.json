@@ -25,7 +25,7 @@
     "linter": {
       "type": "string",
       "description": "The tool to use for running lint checks.",
-        "enum": ["none", "pylint", "flake8", "pycodestyle", "pylama", "mypy"],
+      "enum": ["none", "pylint", "flake8", "pycodestyle", "pylama", "mypy"],
       "default": "none",
       "x-prompt": "Optionally add and initialize a linter."
     },
@@ -39,7 +39,7 @@
     "unitTestRunner": {
       "type": "string",
       "description": "The tool to use for running unit tests.",
-        "enum": ["unittest", "pytest", "pyre"],
+      "enum": ["unittest", "pytest", "pyre"],
       "default": "unittest",
       "x-prompt": "Optionally add and initialize a unit test runner."
     },
