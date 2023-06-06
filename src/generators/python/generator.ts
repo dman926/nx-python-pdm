@@ -12,6 +12,7 @@ import {
   ensurePackage,
   NX_VERSION,
   runTasksInSerial,
+  GeneratorCallback,
 } from '@nx/devkit';
 import { Linter as nxLinter } from '@nx/linter';
 import { readFileSync, writeFileSync, rmSync } from 'fs';
@@ -26,8 +27,6 @@ interface NormalizedOptions extends PythonGeneratorSchema {
   rootOffset: string;
   parsedTags: string[];
 }
-
-type EndTask = () => void | Promise<void>;
 
 const normalizeOptions = (
   tree: Tree,
@@ -187,7 +186,7 @@ export const pdmInstallCommand = ({
 const addE2E = async (
   tree: Tree,
   { projectName }: NormalizedOptions
-): Promise<EndTask> => {
+): Promise<GeneratorCallback> => {
   const { cypressE2EConfigurationGenerator } = ensurePackage<
     typeof import('@nx/cypress')
   >('@nx/cypress', NX_VERSION);
@@ -202,7 +201,7 @@ export async function pythonGenerator(
   tree: Tree,
   options: PythonGeneratorSchema
 ) {
-  const endTasks: EndTask[] = [];
+  const endTasks: GeneratorCallback[] = [];
   const normalizedOptions = normalizeOptions(tree, options);
   const {
     buildBackend,
@@ -244,37 +243,35 @@ export async function pythonGenerator(
 
   return async () => {
     // Initialize PDM specifics
-    endTasks.unshift(async () => {
-      const cwd = joinPathFragments(tree.root, projectRoot);
-      dummyFiles.forEach((dummyFile) => {
-        rmSync(joinPathFragments(cwd, dummyFile));
-      });
-
-      await pdm(pdmInitCommand(projectType, buildBackend), {
-        cwd,
-      });
-
-      // Add project name, version, and authors as the minimum needed to build
-      // PDM automatically gives project name and version for libraries, but applications do not for some reason
-      const tomlPath = joinPathFragments(cwd, 'pyproject.toml');
-      const pyprojectContent = readFileSync(tomlPath)
-        .toString()
-        // Add the project name
-        .replace(/(^name\s*=\s*)("")/gm, `$1"${projectName}"`)
-        // Add the version if not present
-        .replace(/(^version\s*=\s*)("")/gm, '$1"0.1.0"')
-        // Add boilerplate to the authors list
-        .replace(
-          /(^authors\s*=\s*)(\[\s*\{name\s*=\s*"", email\s*=\s*""\},\s*\])/gm,
-          '$1[\n    {name = "Your Name", email = "your@email.com"},\n]'
-        );
-      writeFileSync(tomlPath, pyprojectContent);
-
-      await pdm(pdmInstallCommand(normalizedOptions), {
-        cwd,
-      });
+    const cwd = joinPathFragments(tree.root, projectRoot);
+    dummyFiles.forEach((dummyFile) => {
+      rmSync(joinPathFragments(cwd, dummyFile));
     });
-    
+
+    await pdm(pdmInitCommand(projectType, buildBackend), {
+      cwd,
+    });
+
+    // Add project name, version, and authors as the minimum needed to build
+    // PDM automatically gives project name and version for libraries, but applications do not for some reason
+    const tomlPath = joinPathFragments(cwd, 'pyproject.toml');
+    const pyprojectContent = readFileSync(tomlPath)
+      .toString()
+      // Add the project name
+      .replace(/(^name\s*=\s*)("")/gm, `$1"${projectName}"`)
+      // Add the version if not present
+      .replace(/(^version\s*=\s*)("")/gm, '$1"0.1.0"')
+      // Add boilerplate to the authors list
+      .replace(
+        /(^authors\s*=\s*)(\[\s*\{name\s*=\s*"", email\s*=\s*""\},\s*\])/gm,
+        '$1[\n    {name = "Your Name", email = "your@email.com"},\n]'
+      );
+    writeFileSync(tomlPath, pyprojectContent);
+
+    await pdm(pdmInstallCommand(normalizedOptions), {
+      cwd,
+    });
+
     runTasksInSerial(...endTasks);
   };
 }

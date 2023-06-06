@@ -188,4 +188,8 @@ describe('python generator', () => {
       }
     }
   });
+
+  it('should add E2E configurations properly', () => {
+    expect('E2E TESTS NOT ADDED!').toBeFalsy();
+  });
 });
