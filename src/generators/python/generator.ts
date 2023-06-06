@@ -145,7 +145,12 @@ export const pdmInstallCommand = ({
   typeChecker,
   unitTestRunner,
 }: NormalizedOptions) => {
-  let pdmInstallCommand = `add -d ${unitTestRunner}`;
+  let pdmInstallCommand = `add -d`;
+  if (unitTestRunner !== 'unittest') {
+    pdmInstallCommand += ` ${unitTestRunner}`;
+  }
+  // !pdmInstallCommand.includes(`...`) is a safeguard against runners being included
+  // multiple times due to shared responsibilities with certain packages.
   if (
     linter &&
     linter !== 'none' &&
