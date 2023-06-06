@@ -21,9 +21,6 @@ describe('pdm executor', () => {
     await runNxCommandAsync(
       `generate nx-python-pdm:python --name ${name} --no-interactive`
     );
-    // NX Daemon is having a hard time picking up new projects.
-    // Give it a nudge.
-    await runNxCommandAsync('reset');
     expect(() => runNxCommand(`build ${name}`)).not.toThrow();
     expect(() =>
       checkFilesExist(`dist/${name}/${name}-0.1.0.tar.gz`)
