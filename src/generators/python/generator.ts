@@ -82,7 +82,7 @@ const getTargets = ({
       executor,
       options: {
         command: 'run main.py',
-      }
+      },
     },
     test: {
       executor,
