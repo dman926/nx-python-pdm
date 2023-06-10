@@ -11,9 +11,17 @@ export default async function runpdm(
   const { command, cwd, raw } = options;
 
   return pdm(command, { cwd: cwd || projectRoot, raw })
-    .then(() => ({
-      success: true,
-    }))
+    .then(({ stdout, stderr }) => {
+      if (stdout) {
+        console.log(stdout);
+      }
+      if (stderr) {
+        console.error(stderr);
+      }
+      return {
+        success: true,
+      };
+    })
     .catch((error) => {
       console.error(error);
       return {
