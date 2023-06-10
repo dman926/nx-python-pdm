@@ -35,20 +35,40 @@ pnpm add -D nx-python-pdm
 
 - python - Create an application or library with PDM
   - name\*: Name of the project.
-  - projectType: Application or Library. Defaults to "application".
-    - application
+  - projectType\*: Application or Library.
+    - application (default)
     - library
   - buildBackend: Override the default build backend.
     - pdm-backend
     - setuptools
     - flot
     - hatchling
+  - e2eTestRunner: The tool to use for running E2E tests.
+    - cypress
+    - robot
+  - linter: The tool to use for running lint checks.
+    - pylint
+    - flake8
+    - pycodestyle
+    - pylama
+    - mypy
+  - typeChecker: The tool to use for running type checks.
+    - mypy
+    - pyright
+    - pyre
+  - unitTestRunner: The tool to use for running unit tests.
+    - unittest (default)
+    - pytest
+    - pyre
   - directory: A diretory where the project is placed.
   - tags: Add tags to the project (used for linting).
 
 ### Targets
 
 - build: Build the project with PDM and move the built files to `dist/{project}/`
-- pdm: Allows running arbitrary PDM commands in the project through NX
-
-Targets for `lint` and `test` are in the works, but they can always be created manually with the `pdm` executor.
+- serve: Run `main.py` with PDM.
+- test: Run unit tests with the selected unit test runner.
+- lint: Run lint checks with the selected linter.
+- typeCheck: Run type checks with the selected tool.
+- e2e: Run end-to-end tests with the selected test runner.
+- pdm: Allows running arbitrary PDM commands in the project through NX.
