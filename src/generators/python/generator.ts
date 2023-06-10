@@ -78,6 +78,12 @@ const getTargets = ({
         command: `build --dest=${rootOffset}dist/${projectDirectory}`,
       },
     },
+    serve: {
+      executor,
+      options: {
+        command: 'run main.py',
+      }
+    },
     test: {
       executor,
       options: {
