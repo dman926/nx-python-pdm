@@ -45,8 +45,9 @@ pnpm add -D nx-python-pdm
     - flot
     - hatchling
   - e2eTestRunner: The tool to use for running E2E tests.
+    - _In progress. This technically works for having a runner and target added to the project directly, but it is untested and needs a flag and a generator to be added to create it as a separate E2E project. Also the generator will not create the e2e target if you pick robotframework, but it will install it._
     - cypress
-    - robot
+    - robotframework
   - linter: The tool to use for running lint checks.
     - pylint
     - flake8
@@ -71,5 +72,6 @@ pnpm add -D nx-python-pdm
 - test: Run unit tests with the selected unit test runner.
 - lint: Run lint checks with the selected linter.
 - typeCheck: Run type checks with the selected tool.
-- e2e (in progress): Run end-to-end tests with the selected test runner.
+- e2e: Run end-to-end tests with the selected test runner.
+  - _In progress. It technically works, but it is missing tests. It's also not created automatically by the python generator_
 - pdm: Allows running arbitrary PDM commands in the project through NX.

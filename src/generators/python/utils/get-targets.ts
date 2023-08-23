@@ -1,7 +1,14 @@
 import type { TargetConfiguration } from '@nx/devkit';
 import type { NormalizedOptions } from './normalize-options';
 
-type PythonTarget = 'build' | 'serve' | 'test' | 'lint' | 'typeCheck' | 'pdm';
+type PythonTarget =
+  | 'build'
+  | 'serve'
+  | 'test'
+  | 'lint'
+  | 'typeCheck'
+  | 'e2e'
+  | 'pdm';
 
 // All targets have the same configuration for now
 interface PythonTargetOption {
@@ -9,9 +16,12 @@ interface PythonTargetOption {
 }
 
 type Targets = Partial<{
-  [targetName in PythonTarget]: TargetConfiguration<PythonTargetOption>;
-}> & {
-  [targetName: string]: TargetConfiguration<unknown>;
+  [targetName in Exclude<
+    PythonTarget,
+    'e2e'
+  >]: TargetConfiguration<PythonTargetOption>;
+}> & { e2e?: TargetConfiguration<PythonTargetOption | unknown> } & {
+  [targetName in string]: TargetConfiguration<unknown>;
 };
 
 export const getTargets = ({
