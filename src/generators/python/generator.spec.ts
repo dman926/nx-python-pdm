@@ -144,8 +144,8 @@ describe('python generator', () => {
       };
       await pythonGenerator(tree, optionsWithAdditionalTarget);
       const config = readProjectConfiguration(tree, 'test');
-      expect(config.targets.test).toBeDefined();
-      expect(config.targets.test.options.command).toContain(runner.command);
+      expect(config.targets?.test).toBeDefined();
+      expect(config.targets?.test.options.command).toContain(runner.command);
     }
   });
 
@@ -159,11 +159,11 @@ describe('python generator', () => {
       await pythonGenerator(tree, optionsWithAdditionalTarget);
       const config = readProjectConfiguration(tree, 'test');
       if (linter.name !== 'none') {
-        expect(config.targets.lint).toBeDefined();
-        expect(config.targets.lint.options.command).toContain(linter.command);
+        expect(config.targets?.lint).toBeDefined();
+        expect(config.targets?.lint.options.command).toContain(linter.command);
       } else {
         // When 'none' is specified, no lint target is added
-        expect(config.targets.lint).not.toBeDefined();
+        expect(config.targets?.lint).not.toBeDefined();
       }
     }
   });
@@ -178,13 +178,13 @@ describe('python generator', () => {
       await pythonGenerator(tree, optionsWithAdditionalTarget);
       const config = readProjectConfiguration(tree, 'test');
       if (runner.name !== 'none') {
-        expect(config.targets.typeCheck).toBeDefined();
-        expect(config.targets.typeCheck.options.command).toContain(
+        expect(config.targets?.typeCheck).toBeDefined();
+        expect(config.targets?.typeCheck.options.command).toContain(
           runner.command
         );
       } else {
         // When 'none' is specified, no typeCheck target is added
-        expect(config.targets.typeCheck).not.toBeDefined();
+        expect(config.targets?.typeCheck).not.toBeDefined();
       }
     }
   });
