@@ -6,13 +6,17 @@ export default async function runpdm(
   options: pdmExecutorSchema,
   context: ExecutorContext
 ) {
+  if (!(context.projectsConfigurations && context.projectName)) {
+    throw new Error('Missing projectsConfigurations or projectName');
+  }
+
   const projectRoot =
     context.projectsConfigurations.projects[context.projectName].root;
-  const { command, cwd, raw } = options;
+  const { command, cwd, raw, quiet } = options;
 
   return pdm(command, { cwd: cwd || projectRoot, raw })
     .then(({ stdout, stderr }) => {
-      if (stdout) {
+      if (!quiet && stdout) {
         console.log(stdout);
       }
       if (stderr) {
