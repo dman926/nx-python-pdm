@@ -79,3 +79,4 @@ pnpm add -D nx-python-pdm
 ### Other TODOs
 
 - Add [monorepo support](https://pdm.fming.dev/latest/usage/advanced/#use-pdm-to-manage-a-monorepo)
+- Update nx workflow versions
