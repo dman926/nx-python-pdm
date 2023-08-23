@@ -75,3 +75,7 @@ pnpm add -D nx-python-pdm
 - e2e: Run end-to-end tests with the selected test runner.
   - _In progress. It technically works, but it is missing tests. It's also not created automatically by the python generator_
 - pdm: Allows running arbitrary PDM commands in the project through NX.
+
+### Other TODOs
+
+- Add [monorepo support](https://pdm.fming.dev/latest/usage/advanced/#use-pdm-to-manage-a-monorepo)
