@@ -1,17 +1,18 @@
 import type { ProjectType } from '@nx/devkit';
 
-export type Linter =
-  | 'none'
-  | 'pylint'
-  | 'flake8'
-  | 'pycodestyle'
-  | 'pylama'
-  | 'mypy';
-export type TypeChecker = 'none' | 'mypy' | 'pyright' | 'pyre';
+type Optional<T> = 'none' | T;
+
+export type Linter = Optional<
+  'pylint' | 'flake8' | 'pycodestyle' | 'pylama' | 'mypy'
+>;
+export type TypeChecker = Optional<'mypy' | 'pyright' | 'pyre'>;
+// Technically there is no 'none' option because `unittest` is part of the standard library
 export type UnitTestRunner = 'unittest' | 'pytest' | 'pyre';
-export type E2ETestRunner = 'none' | 'cypress' | 'robot';
+export type E2ETestRunner = Optional<'cypress' | 'robotframework'>;
+// Same applies to the build backend since `pdm-backend` will always be default
 export type BuildBackend = 'pdm-backend' | 'setuptools' | 'flot' | 'hatchling';
 
+// TODO: Add option to scaffold new project for E2E for non-node e2e runners (robot) (?)
 export interface PythonGeneratorSchema {
   // Name of the project.
   name: string;

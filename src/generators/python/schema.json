@@ -46,7 +46,7 @@
     "e2eTestRunner": {
       "type": "string",
       "description": "The tool to use for running E2E tests.",
-      "enum": ["none", "cypress", "robot"],
+      "enum": ["none", "cypress", "robotframework"],
       "default": "none",
       "x-prompt": "Optionally add and initialize an project for an E2E runner."
     },

@@ -16,8 +16,13 @@ import {
 } from '@nx/devkit';
 import { Linter as nxLinter } from '@nx/linter';
 import { readFileSync, writeFileSync, rmSync } from 'fs';
-import { BuildBackend, PythonGeneratorSchema } from './schema';
-import { dummyFiles } from './dummyFiles';
+import {
+  BuildBackend,
+  E2ETestRunner,
+  PythonGeneratorSchema,
+  UnitTestRunner,
+} from './schema';
+import { DUMMY_FILES, PYTHON_E2E_TEST_RUNNERS } from './constants';
 import { pdm } from '../../pdm/pdm';
 
 interface NormalizedOptions extends PythonGeneratorSchema {
@@ -151,40 +156,38 @@ export const pdmInitCommand = (
   return pdmInitCommand;
 };
 
+/**
+ * Returns the Python E2E runner if it is included in the list of available runners.
+ * Otherwise, returns 'none'.
+ *
+ * @param {E2ETestRunner} e2eTestRunner - The E2E test runner to check.
+ * @return {string} The Python E2E runner or 'none'.
+ */
+const filterE2ERunner = (e2eTestRunner: E2ETestRunner) =>
+  PYTHON_E2E_TEST_RUNNERS.includes(e2eTestRunner) ? e2eTestRunner : 'none';
+
+const filterUnitTestRunner = (unitTestRunner: UnitTestRunner) =>
+  unitTestRunner !== 'unittest' ? unitTestRunner : 'none';
+
 export const pdmInstallCommand = ({
   linter,
   typeChecker,
   unitTestRunner,
   e2eTestRunner,
-}: NormalizedOptions) => {
-  let pdmInstallCommand = `add -d`;
-  if (unitTestRunner !== 'unittest') {
-    pdmInstallCommand += ` ${unitTestRunner}`;
-  }
-  // !pdmInstallCommand.includes(`...`) is a safeguard against runners being included
-  // multiple times due to shared responsibilities with certain packages.
-  if (
-    linter &&
-    linter !== 'none' &&
-    !pdmInstallCommand.includes(` ${linter}`)
-  ) {
-    pdmInstallCommand += ` ${linter}`;
-  }
-  if (
-    typeChecker &&
-    typeChecker !== 'none' &&
-    !pdmInstallCommand.includes(` ${typeChecker}`)
-  ) {
-    pdmInstallCommand += ` ${typeChecker}`;
-  }
-  // includes is not strictly neccessary. Sanity check
-  if (
-    e2eTestRunner === 'robot' &&
-    !pdmInstallCommand.includes(' robotframework')
-  ) {
-    pdmInstallCommand += 'robotframework';
-  }
-  return pdmInstallCommand;
+}: NormalizedOptions): string => {
+  const pdmInstallCommands = new Set();
+  [
+    linter,
+    typeChecker,
+    filterUnitTestRunner(unitTestRunner),
+    filterE2ERunner(e2eTestRunner),
+  ]
+    .filter((pkg) => pkg !== 'none')
+    .forEach((pkg) => {
+      pdmInstallCommands.add(pkg);
+    });
+
+  return `add -d ${Array.from(pdmInstallCommands).join(' ')}`;
 };
 
 // Only Cypress calls this function for now
@@ -234,7 +237,7 @@ export async function pythonGenerator(
     options
   );
 
-  dummyFiles.forEach((dummyFile) => {
+  DUMMY_FILES.forEach((dummyFile) => {
     tree.write(joinPathFragments(projectRoot, dummyFile), '');
   });
   tree.write(joinPathFragments(projectRoot, '.venv'), '');
@@ -250,7 +253,7 @@ export async function pythonGenerator(
   return async () => {
     // Initialize PDM specifics
     const cwd = joinPathFragments(tree.root, projectRoot);
-    dummyFiles.forEach((dummyFile) => {
+    DUMMY_FILES.forEach((dummyFile) => {
       rmSync(joinPathFragments(cwd, dummyFile));
     });
 
