@@ -35,7 +35,7 @@ export const getTargets = ({
   const testCommand = (() => {
     switch (unitTestRunner) {
       case 'unittest': {
-        return 'run unittest discover .';
+        return 'run python -m unittest discover .';
       }
       case 'pytest':
       case 'pyre': {
