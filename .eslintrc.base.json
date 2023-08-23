@@ -38,6 +38,13 @@
         "jest": true
       },
       "rules": {}
+    },
+    {
+      "files": ["*.mjs"],
+      "parserOptions": {
+        "sourceType": "module",
+        "ecmaVersion": 2015
+      }
     }
   ]
 }
