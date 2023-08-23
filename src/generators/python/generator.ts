@@ -2,13 +2,9 @@ import {
   addProjectConfiguration,
   formatFiles,
   generateFiles,
-  names,
-  getWorkspaceLayout,
   Tree,
-  offsetFromRoot,
   joinPathFragments,
   ProjectType,
-  TargetConfiguration,
   ensurePackage,
   NX_VERSION,
   runTasksInSerial,
@@ -16,178 +12,60 @@ import {
 } from '@nx/devkit';
 import { Linter as nxLinter } from '@nx/linter';
 import { readFileSync, writeFileSync, rmSync } from 'fs';
+import { DUMMY_FILES } from './constants';
 import {
-  BuildBackend,
-  E2ETestRunner,
-  PythonGeneratorSchema,
-  UnitTestRunner,
-} from './schema';
-import { DUMMY_FILES, PYTHON_E2E_TEST_RUNNERS } from './constants';
+  pythonInstallableFilters,
+  getTargets,
+  setJoin,
+  normalizeOptions,
+  type NormalizedOptions,
+} from './utils';
 import { pdm } from '../../pdm/pdm';
-
-interface NormalizedOptions extends PythonGeneratorSchema {
-  projectName: string;
-  projectRoot: string;
-  projectDirectory: string;
-  rootOffset: string;
-  parsedTags: string[];
-}
-
-const normalizeOptions = (
-  tree: Tree,
-  options: PythonGeneratorSchema
-): NormalizedOptions => {
-  const { appsDir, libsDir } = getWorkspaceLayout(tree);
-  const { name, projectType, directory, tags } = options;
-
-  const generatedNames = names(name);
-  const projectDirectory = directory
-    ? joinPathFragments(directory, generatedNames.fileName)
-    : generatedNames.fileName;
-  const projectName = projectDirectory.replace(/\//g, '-');
-  const projectRoot = `${
-    projectType === 'application' ? appsDir : libsDir
-  }/${projectDirectory}`;
-  const rootOffset = offsetFromRoot(projectRoot);
-  const parsedTags = tags?.split(',').map((s) => s.trim()) || [];
-  return {
-    ...options,
-    projectName,
-    projectRoot,
-    projectDirectory,
-    rootOffset,
-    parsedTags,
-  };
-};
-
-const getTargets = ({
-  rootOffset,
-  projectDirectory,
-  unitTestRunner,
-  linter,
-  typeChecker,
-}: NormalizedOptions) => {
-  const executor = 'nx-python-pdm:pdm';
-  let testCommand: string;
-  if (unitTestRunner === 'unittest') {
-    testCommand = 'run unittest discover .';
-  } else if (unitTestRunner === 'pytest') {
-    testCommand = 'run pytest';
-  } else if (unitTestRunner === 'pyre') {
-    testCommand = 'run pyre';
-  }
-  const targets: { [targetName: string]: TargetConfiguration<unknown> } = {
-    build: {
-      executor,
-      options: {
-        command: `build --dest=${rootOffset}dist/${projectDirectory}`,
-      },
-    },
-    serve: {
-      executor,
-      options: {
-        command: 'run main.py',
-      },
-    },
-    test: {
-      executor,
-      options: {
-        command: testCommand,
-      },
-    },
-  };
-
-  if (linter && linter !== 'none') {
-    let lintCommand: string;
-    if (linter === 'pylint') {
-      lintCommand = 'run pylint ./**/*.py';
-    } else if (linter === 'flake8') {
-      lintCommand = 'run flake8';
-    } else if (linter == 'pycodestyle') {
-      lintCommand = 'run pycodestyle ./**/*.py';
-    } else if (linter == 'pylama') {
-      lintCommand = 'run pylama';
-    } else if (linter == 'mypy') {
-      lintCommand = 'run mypy ./**/*.py';
-    }
-    targets.lint = {
-      executor,
-      options: {
-        command: lintCommand,
-      },
-    };
-  }
-
-  if (typeChecker && typeChecker !== 'none') {
-    let typeCheckCommand: string;
-    if (typeChecker === 'mypy') {
-      typeCheckCommand = 'run mypy ./**/*.py';
-    } else if (typeChecker === 'pyright') {
-      typeCheckCommand = 'run pyright';
-    } else if (typeChecker === 'pyre') {
-      typeCheckCommand = 'run pyre';
-    }
-    targets.typeCheck = {
-      executor,
-      options: {
-        command: typeCheckCommand,
-      },
-    };
-  }
-
-  targets.pdm = {
-    executor,
-  };
-
-  return targets;
-};
+import type { BuildBackend, PythonGeneratorSchema } from './schema';
 
 export const pdmInitCommand = (
   projectType: ProjectType,
   buildBackend?: BuildBackend
 ) => {
-  let pdmInitCommand = 'init --non-interactive';
+  const pdmInitCommands = new Set<string>();
   if (projectType === 'library') {
-    pdmInitCommand += ' --lib';
+    pdmInitCommands.add('--lib');
   }
   if (buildBackend) {
-    pdmInitCommand += ` --backend=${buildBackend}`;
+    pdmInitCommands.add(`--backend=${buildBackend}`);
   }
-  return pdmInitCommand;
+  pdmInitCommands.add('--non-interactive');
+
+  return `init ${setJoin(pdmInitCommands, ' ')}`;
 };
-
-/**
- * Returns the Python E2E runner if it is included in the list of available runners.
- * Otherwise, returns 'none'.
- *
- * @param {E2ETestRunner} e2eTestRunner - The E2E test runner to check.
- * @return {string} The Python E2E runner or 'none'.
- */
-const filterE2ERunner = (e2eTestRunner: E2ETestRunner) =>
-  PYTHON_E2E_TEST_RUNNERS.includes(e2eTestRunner) ? e2eTestRunner : 'none';
-
-const filterUnitTestRunner = (unitTestRunner: UnitTestRunner) =>
-  unitTestRunner !== 'unittest' ? unitTestRunner : 'none';
 
 export const pdmInstallCommand = ({
   linter,
   typeChecker,
   unitTestRunner,
   e2eTestRunner,
-}: NormalizedOptions): string => {
-  const pdmInstallCommands = new Set();
+}: NormalizedOptions) => {
+  const pdmInstallCommands = new Set<string>();
   [
     linter,
     typeChecker,
-    filterUnitTestRunner(unitTestRunner),
-    filterE2ERunner(e2eTestRunner),
+    pythonInstallableFilters.filterUnitTestRunner(unitTestRunner),
+    pythonInstallableFilters.filterE2ERunner(e2eTestRunner),
   ]
-    .filter((pkg) => pkg !== 'none')
+    // Remove undefined and 'none' values
+    .filter(
+      (pkg): pkg is Exclude<typeof pkg, undefined | 'none'> =>
+        pkg !== undefined && pkg !== 'none'
+    )
     .forEach((pkg) => {
       pdmInstallCommands.add(pkg);
     });
 
-  return `add -d ${Array.from(pdmInstallCommands).join(' ')}`;
+  if (pdmInstallCommands.size) {
+    return `add -d ${setJoin(pdmInstallCommands, ' ')}`;
+  }
+
+  return null;
 };
 
 // Only Cypress calls this function for now
@@ -277,9 +155,13 @@ export async function pythonGenerator(
       );
     writeFileSync(tomlPath, pyprojectContent);
 
-    await pdm(pdmInstallCommand(normalizedOptions), {
-      cwd,
-    });
+    const installCommand = pdmInstallCommand(normalizedOptions);
+
+    if (installCommand) {
+      await pdm(installCommand, {
+        cwd,
+      });
+    }
 
     runTasksInSerial(...endTasks);
   };
