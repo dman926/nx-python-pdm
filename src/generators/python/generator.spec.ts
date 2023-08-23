@@ -88,7 +88,7 @@ const typeCheckers: { name: TypeChecker; command?: string }[] = [
   { name: 'pyre', command: 'run pyre' },
 ];
 const unitTestRunners: { name: UnitTestRunner; command?: string }[] = [
-  { name: 'unittest', command: 'run unittest discover .' },
+  { name: 'unittest', command: 'run python -m unittest discover .' },
   { name: 'pytest', command: 'run pytest' },
   { name: 'pyre', command: 'run pyre' },
 ];
