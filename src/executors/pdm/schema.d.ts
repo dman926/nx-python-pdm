@@ -5,6 +5,6 @@ export interface pdmExecutorSchema {
   cwd?: string;
   /** Do not prepend 'pdm ' to the given command. */
   raw?: boolean;
-  /** Suppress output to stdout. stderr will still be printed */
+  /** Suppress output to stdout. stderr will still be printed. */
   quiet?: boolean;
 }

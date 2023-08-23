@@ -30,6 +30,7 @@ pnpm add -D nx-python-pdm
   - command\*: The command to run. 'pdm ' is prepended to this command.
   - cwd: Override where the command runs. By default, the command runs in the project root.
   - raw: Do not prepend 'pdm ' to the given command.
+  - quiet: Suppress output to stdout. stderr will still be printed.
 
 ### Generators
 
@@ -70,5 +71,5 @@ pnpm add -D nx-python-pdm
 - test: Run unit tests with the selected unit test runner.
 - lint: Run lint checks with the selected linter.
 - typeCheck: Run type checks with the selected tool.
-- e2e: Run end-to-end tests with the selected test runner.
+- e2e (in progress): Run end-to-end tests with the selected test runner.
 - pdm: Allows running arbitrary PDM commands in the project through NX.
