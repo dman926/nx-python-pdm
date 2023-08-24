@@ -36,14 +36,13 @@ describe('pdm executor', () => {
     const filesInDirectory = listFiles(`dist/${name}`);
     filesInDirectory.unshift(`Files present in dist/${name}`);
 
-    // Output a list of the files in `dist/${name}` with the rejected promise(s) expected filename(s) when either promise rejects
-    const outputName = name.replace('-', '_');
-
-    // !!! This is throwing but the error message makes it look like it shouldn't be !!!
     expect(() =>
       checkFilesExist(
-        buildOutputPath(name, `${outputName}-0.1.0.tar.gz`),
-        buildOutputPath(name, `${outputName}-0.1.0-py3-none-any.whl`)
+        buildOutputPath(name, `${name}-0.1.0.tar.gz`),
+        buildOutputPath(
+          name,
+          `${name.replace(/-/g, '_')}-0.1.0-py3-none-any.whl`
+        )
       )
     ).not.toThrowWithAdditional(undefined, filesInDirectory.join('\n'));
     cleanup(name);
