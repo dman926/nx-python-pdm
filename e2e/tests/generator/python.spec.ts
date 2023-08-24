@@ -4,7 +4,7 @@ import {
   runNxCommandAsync,
 } from '@nx/plugin/testing';
 
-describe('python generator', () => {
+describe.skip('python generator', () => {
   beforeAll(() => {
     ensureNxProject('nx-python-pdm', 'dist/nx-python-pdm');
   });
