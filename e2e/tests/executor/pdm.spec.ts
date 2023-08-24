@@ -48,16 +48,27 @@ describe('pdm executor', () => {
     cleanup(name);
   });
 
-  it.skip('should be able to serve generated projects', async () => {
+  it('should be able to serve generated projects', async () => {
     const name = 'serve-executor-test';
     await runNxCommandAsync(
       `generate nx-python-pdm:python --name ${name} --no-interactive`
     );
     let serveOutput = '';
+    const expectedOutput =
+      '\n' +
+      '> nx run serve-executor-test:serve\n' +
+      '\n' +
+      'Hello World\n' +
+      '\n' +
+      ' \n' +
+      '\n' +
+      ' >  NX   Successfully ran target serve for project serve-executor-test\n' +
+      '\n' +
+      '\n';
     expect(() => {
       serveOutput = runNxCommand(`serve ${name}`);
     }).not.toThrow();
-    expect(serveOutput).toBe('Hello World');
+    expect(serveOutput).toBe(expectedOutput);
     // cleanup(name);
   });
 
