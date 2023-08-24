@@ -10,6 +10,11 @@ on:
       - README.md
       - LICENSE
   pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
     paths-ignore:
       - .github/**
       - .vscode/**
