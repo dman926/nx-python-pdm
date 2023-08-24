@@ -45,7 +45,7 @@ export const pdmInstallCommand = ({
   unitTestRunner,
   e2eTestRunner,
 }: NormalizedOptions) => {
-  const pdmInstallCommands = new Set<string>();
+  const pdmInstallCommands = new Set<string>(['setuptools']);
   [
     linter,
     typeChecker,

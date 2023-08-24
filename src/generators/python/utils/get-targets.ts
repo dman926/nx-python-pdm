@@ -72,16 +72,19 @@ export const getTargets = ({
     const lintCommand = (() => {
       switch (linter) {
         case 'pycodestyle': {
-          return 'run pycodestyle ./**/*.py';
+          return 'run pycodestyle ./**/*.py --exclude=.venv,__pycache__';
         }
-        case 'flake8':
+        case 'flake8': {
+          return 'run flake8 --exclude .venv,__pycache__';
+        }
         case 'pylama': {
-          return `run ${linter}`;
+          return 'run pylama --skip .venv/**,__pycache__/**';
         }
-        case 'pylint':
+        case 'pylint': {
+          return 'run pylint ./**/*.py --ignore=.venv,__pycache__';
+        }
         case 'mypy': {
-          return `run ${linter} ./**/*.py`;
-          break;
+          return 'run mypy ./**/*.py --exclude .venv,__pycache__';
         }
         default: {
           throw new Error(`Unknown/unhandled linter: ${linter}`);

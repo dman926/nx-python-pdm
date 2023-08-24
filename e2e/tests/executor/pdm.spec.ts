@@ -94,4 +94,19 @@ describe('pdm executor', () => {
       cleanup(name);
     });
   });
+
+  ['pylint', 'flake8', 'pycodestyle', 'pylama', 'mypy'].forEach((linter) => {
+    it.only(`should be able to run linting on generated projects with ${linter}`, async () => {
+      const name = uniq(`${linter}-linting-executor-test`);
+      await runNxCommandAsync(
+        `generate nx-python-pdm:python --name ${name} --linter ${linter} --no-interactive`
+      );
+
+      let output = '';
+      expect(
+        () => (output = runNxCommand(`lint ${name}`))
+      ).not.toThrowWithAdditional(undefined, output);
+      cleanup(name);
+    });
+  });
 });
