@@ -39,7 +39,7 @@
     "unitTestRunner": {
       "type": "string",
       "description": "The tool to use for running unit tests.",
-      "enum": ["unittest", "pytest", "pyre"],
+      "enum": ["unittest", "pytest"],
       "default": "unittest",
       "x-prompt": "Optionally add and initialize a unit test runner."
     },

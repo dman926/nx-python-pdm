@@ -7,7 +7,7 @@ export type Linter = Optional<
 >;
 export type TypeChecker = Optional<'mypy' | 'pyright' | 'pyre'>;
 // Technically there is no 'none' option because `unittest` is part of the standard library
-export type UnitTestRunner = 'unittest' | 'pytest' | 'pyre';
+export type UnitTestRunner = 'unittest' | 'pytest';
 export type E2ETestRunner = Optional<'cypress' | 'robotframework'>;
 // Same applies to the build backend since `pdm-backend` will always be default
 export type BuildBackend = 'pdm-backend' | 'setuptools' | 'flot' | 'hatchling';

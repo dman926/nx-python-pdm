@@ -4,6 +4,8 @@ import {
   ensureNxProject,
   runNxCommandAsync,
   runNxCommand,
+  runCommandAsync,
+  uniq,
 } from '@nx/plugin/testing';
 
 const cleanup = async (name: string) => {
@@ -27,7 +29,7 @@ describe('pdm executor', () => {
   });
 
   it('should be able to build generated projects', async () => {
-    const name = 'build-executor-test';
+    const name = uniq('build-executor-test');
     await runNxCommandAsync(
       `generate nx-python-pdm:python --name ${name} --no-interactive`
     );
@@ -49,20 +51,20 @@ describe('pdm executor', () => {
   });
 
   it('should be able to serve generated projects', async () => {
-    const name = 'serve-executor-test';
+    const name = uniq('serve-executor-test');
     await runNxCommandAsync(
       `generate nx-python-pdm:python --name ${name} --no-interactive`
     );
     let serveOutput = '';
     const expectedOutput =
       '\n' +
-      '> nx run serve-executor-test:serve\n' +
+      `> nx run ${name}:serve\n` +
       '\n' +
       'Hello World\n' +
       '\n' +
       ' \n' +
       '\n' +
-      ' >  NX   Successfully ran target serve for project serve-executor-test\n' +
+      ` >  NX   Successfully ran target serve for project ${name}\n` +
       '\n' +
       '\n';
     expect(() => {
@@ -72,15 +74,24 @@ describe('pdm executor', () => {
     // cleanup(name);
   });
 
-  const testRunners = ['unittest', 'pytest', 'pyre'];
-  it.skip(`should be able to run tests on generated projects`, async () => {
-    for (const testRunner of testRunners) {
-      const name = `${testRunner}-test-executor-test`;
+  ['unittest', 'pytest'].forEach((testRunner) => {
+    it(`should be able to run tests on generated projects with ${testRunner}`, async () => {
+      const name = uniq(`${testRunner}-test-executor-test`);
       await runNxCommandAsync(
         `generate nx-python-pdm:python --name ${name} --unitTestRunner ${testRunner} --no-interactive`
       );
-      expect(() => runNxCommand(`test ${name}`)).not.toThrow();
+
+      // Create dummy test file
+      const testFilePath = `apps/${name}/tests/test_dummy.py`;
+      await runCommandAsync(
+        `echo "def test_dummy():\\n    assert True" > ${testFilePath}`
+      );
+
+      let output = '';
+      expect(
+        () => (output = runNxCommand(`test ${name}`))
+      ).not.toThrowWithAdditional(undefined, output);
       cleanup(name);
-    }
+    });
   });
 });

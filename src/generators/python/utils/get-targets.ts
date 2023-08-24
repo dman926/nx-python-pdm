@@ -37,9 +37,8 @@ export const getTargets = ({
       case 'unittest': {
         return 'run python -m unittest discover .';
       }
-      case 'pytest':
-      case 'pyre': {
-        return `run ${unitTestRunner}`;
+      case 'pytest': {
+        return 'run pytest .';
       }
       default: {
         throw new Error(
