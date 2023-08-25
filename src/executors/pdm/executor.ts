@@ -2,7 +2,7 @@ import { ExecutorContext } from '@nx/devkit';
 import { pdmExecutorSchema } from './schema';
 import { pdm } from '../../pdm/pdm';
 
-export default async function runpdm(
+export async function runpdm(
   options: pdmExecutorSchema,
   context: ExecutorContext
 ) {
@@ -33,3 +33,5 @@ export default async function runpdm(
       };
     });
 }
+
+export default runpdm;
