@@ -28,27 +28,58 @@ pnpm add -D nx-python-pdm
 
 - pdm - Run a command with PDM on the project
   - command\*: The command to run. 'pdm ' is prepended to this command.
-  - cwd: Override where the command runs. By default, the command runs in the project root.
-  - raw: Do not prepend 'pdm ' to the given command.
+  - cwd: Override where the command runs. By default, the command runs in the project root. If provided, it should be relative to the workspace root.
+  - raw: Do not prepend `'pdm '` to the given command.
+  - quiet: Suppress output to stdout. stderr will still be printed.
 
 ### Generators
 
 - python - Create an application or library with PDM
   - name\*: Name of the project.
-  - projectType: Application or Library. Defaults to "application".
-    - application
+  - projectType\*: Application or Library.
+    - application (default)
     - library
   - buildBackend: Override the default build backend.
     - pdm-backend
     - setuptools
     - flot
     - hatchling
+  - ~~separateE2eProject: Scaffold the E2E configuration in a separate project. Defaults to `true`.~~ _In progress_
+  - e2eTestRunner: The tool to use for running E2E tests.
+    - _In progress. This technically works for having a runner and target added to the project directly, but it is untested and needs a flag and a generator to be added to create it as a separate E2E project. Also the generator will not create the e2e target if you pick robotframework, but it will install it._
+    - cypress
+    - robotframework
+  - linter: The tool to use for running lint checks.
+    - pylint
+    - flake8
+    - pycodestyle
+    - pylama
+    - mypy
+  - typeChecker: The tool to use for running type checks.
+    - mypy
+    - pyright
+    - pyre
+  - unitTestRunner: The tool to use for running unit tests.
+    - unittest (default)
+    - pytest
   - directory: A diretory where the project is placed.
   - tags: Add tags to the project (used for linting).
 
 ### Targets
 
 - build: Build the project with PDM and move the built files to `dist/{project}/`
-- pdm: Allows running arbitrary PDM commands in the project through NX
+- serve: Run `main.py` with PDM.
+- test: Run unit tests with the selected unit test runner.
+- lint: Run lint checks with the selected linter.
+- typeCheck: Run type checks with the selected tool.
+- e2e: Run end-to-end tests with the selected test runner.
+  - _In progress. It technically works, but it is missing tests. It's also not created automatically by the python generator except for cypress_
+- pdm: Allows running arbitrary PDM commands in the project through NX.
 
-Targets for `lint` and `test` are in the works, but they can always be created manually with the `pdm` executor.
+### TODOs
+
+- Add [monorepo support](https://pdm.fming.dev/latest/usage/advanced/#use-pdm-to-manage-a-monorepo)
+- Complete work for E2E configurations.
+  - In-project cypress configuration is included
+  - In-project robotframework is installed, but not configured
+  - External E2E projects feature is not included.

@@ -17,9 +17,11 @@
       "rules": {}
     },
     {
-      "files": "*.json",
+      "files": ["*.json", ".pyre_configuration"],
       "parser": "jsonc-eslint-parser",
-      "rules": {}
+      "rules": {
+        "@nx/dependency-checks": "error"
+      }
     },
     {
       "files": ["./package.json", "./executors.json", "./generators.json"],

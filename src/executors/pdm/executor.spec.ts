@@ -10,6 +10,11 @@ jest.mock('../../pdm/pdm', () => ({
 
 const mockpdm = jest.mocked(pdm);
 
+const getOptions = (options: pdmExecutorSchema): pdmExecutorSchema => ({
+  ...options,
+  quiet: true,
+});
+
 const mockContext: ExecutorContext = {
   root: '',
   cwd: '',
@@ -31,7 +36,9 @@ describe('pdm Executor', () => {
   });
 
   it('should call pdm with the command and project root', async () => {
-    const options: pdmExecutorSchema = { command: 'install' };
+    const options = getOptions({
+      command: 'install',
+    });
     await runpdm(options, mockContext);
     expect(mockpdm).toHaveBeenCalledWith('install', {
       cwd: '/path/to/project',
@@ -39,10 +46,10 @@ describe('pdm Executor', () => {
   });
 
   it('should call pdm with the provided cwd if specified', async () => {
-    const options: pdmExecutorSchema = {
+    const options = getOptions({
       command: 'run',
       cwd: '/path/to/cwd',
-    };
+    });
     await runpdm(options, mockContext);
     expect(mockpdm).toHaveBeenCalledWith('run', {
       cwd: '/path/to/cwd',
@@ -50,7 +57,10 @@ describe('pdm Executor', () => {
   });
 
   it('should call pdm with the "raw" option if specified', async () => {
-    const options: pdmExecutorSchema = { command: 'install', raw: true };
+    const options = getOptions({
+      command: 'install',
+      raw: true,
+    });
     await runpdm(options, mockContext);
     expect(mockpdm).toHaveBeenCalledWith('install', {
       cwd: '/path/to/project',
@@ -60,7 +70,9 @@ describe('pdm Executor', () => {
 
   it('should return an object with "success" set to true if pdm succeeds', async () => {
     mockpdm.mockResolvedValueOnce({ stdout: 'pdm output', stderr: '' });
-    const options: pdmExecutorSchema = { command: 'install' };
+    const options = getOptions({
+      command: 'install',
+    });
     const result = await runpdm(options, mockContext);
     expect(result.success).toBe(true);
   });
@@ -71,7 +83,9 @@ describe('pdm Executor', () => {
 
     const error = new Error('pdm error');
     mockpdm.mockRejectedValueOnce(error);
-    const options: pdmExecutorSchema = { command: 'install' };
+    const options = getOptions({
+      command: 'install',
+    });
     const result = await runpdm(options, mockContext);
     expect(result.success).toBe(false);
     expect(mockConsoleError).toHaveBeenCalledWith(error);

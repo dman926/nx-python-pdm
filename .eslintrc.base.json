@@ -6,6 +6,7 @@
     {
       "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
       "rules": {
+        "default-case": "error",
         "@nx/enforce-module-boundaries": [
           "error",
           {
@@ -37,6 +38,13 @@
         "jest": true
       },
       "rules": {}
+    },
+    {
+      "files": ["*.mjs"],
+      "parserOptions": {
+        "sourceType": "module",
+        "ecmaVersion": 2015
+      }
     }
   ]
 }

@@ -1,35 +1,56 @@
 import {
-  checkFilesExist,
   ensureNxProject,
-  runNxCommandAsync,
   runNxCommand,
+  runNxCommandAsync,
+  uniq,
 } from '@nx/plugin/testing';
+import { cleanup } from '../../util';
 
 describe('pdm executor', () => {
+  const names: string[] = [];
+
   beforeAll(() => {
     ensureNxProject('nx-python-pdm', 'dist/nx-python-pdm');
   });
 
   afterAll(async () => {
+    for (const name of names) {
+      try {
+        await cleanup(name);
+      } catch (error) {
+        console.log(`Failed to cleanup ${name}`);
+      }
+    }
     // `nx reset` kills the daemon, and performs
     // some work which can help clean up e2e leftovers
     await runNxCommandAsync('reset');
   });
 
-  it('should be able to build generated projects', async () => {
-    const name = 'proj';
+  it('should successfully run pdm commands', async () => {
+    const name = uniq('pdm-executor-test');
+    names.push(name);
     await runNxCommandAsync(
       `generate nx-python-pdm:python --name ${name} --no-interactive`
     );
-    // NX Daemon is having a hard time picking up new projects.
-    // Give it a nudge.
-    await runNxCommandAsync('reset');
-    expect(() => runNxCommand(`build ${name}`)).not.toThrow();
-    expect(() =>
-      checkFilesExist(`dist/${name}/${name}-0.1.0.tar.gz`)
-    ).not.toThrow();
-    expect(() =>
-      checkFilesExist(`dist/${name}/${name}-0.1.0-py3-none-any.whl`)
-    ).not.toThrow();
+
+    // pdm info
+    let projectInfo: string[] = [];
+    expect(() => {
+      projectInfo = runNxCommand(`run ${name}:pdm info`).split('\n');
+    }).not.toThrow();
+    expect(projectInfo.length).toBeGreaterThanOrEqual(4);
+    const firstLineOfInfo = projectInfo[3];
+    expect(firstLineOfInfo).toBe('PDM version:');
+
+    // pdm run
+    let runOutput: string[] = [];
+    expect(() => {
+      runOutput = runNxCommand(
+        `run ${name}:pdm "run python -c \\"print('Hello World')\\""`
+      ).split('\n');
+    }).not.toThrow();
+    expect(runOutput.length).toBeGreaterThanOrEqual(4);
+    const firstLineOfPython = runOutput[3];
+    expect(firstLineOfPython).toBe('Hello World');
   });
 });

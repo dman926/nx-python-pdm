@@ -5,16 +5,16 @@ on:
     branches:
       - main
     paths-ignore:
-      - .github/**
-      - .vscode/**
-      - README.md
-      - LICENSE
+      - '.github/**'
+      - '.vscode/**'
+      - 'README.md'
+      - 'LICENSE'
   pull_request:
     paths-ignore:
-      - .github/**
-      - .vscode/**
-      - README.md
-      - LICENSE
+      - '.github/**'
+      - '.vscode/**'
+      - 'README.md'
+      - 'LICENSE'
   workflow_dispatch:
 
 concurrency:
@@ -29,9 +29,6 @@ jobs:
     with:
       number-of-agents: 3
       python-version: '3.11'
-      init-commands: |
-        python -m pip install --upgrade pip
-        pip install pdm
       parallel-commands: |
         pnpm exec nx-cloud record -- pnpm exec nx format:check
       parallel-commands-on-agents: |

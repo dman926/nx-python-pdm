@@ -2,96 +2,109 @@ import {
   addProjectConfiguration,
   formatFiles,
   generateFiles,
-  names,
-  getWorkspaceLayout,
   Tree,
-  offsetFromRoot,
   joinPathFragments,
   ProjectType,
+  ensurePackage,
+  NX_VERSION,
+  runTasksInSerial,
+  GeneratorCallback,
 } from '@nx/devkit';
+import { Linter as nxLinter } from '@nx/linter';
 import { readFileSync, writeFileSync, rmSync } from 'fs';
-import { BuildBackend, PythonGeneratorSchema } from './schema';
-import { dummyFiles } from './dummyFiles';
+import { DUMMY_FILES } from './constants';
+import {
+  pythonInstallableFilters,
+  getTargets,
+  setJoin,
+  normalizeOptions,
+  type NormalizedOptions,
+} from './utils';
 import { pdm } from '../../pdm/pdm';
-
-interface NormalizedOptions extends PythonGeneratorSchema {
-  projectName: string;
-  projectRoot: string;
-  projectDirectory: string;
-  rootOffset: string;
-  parsedTags: string[];
-}
-
-const normalizeOptions = (
-  tree: Tree,
-  options: PythonGeneratorSchema
-): NormalizedOptions => {
-  const { appsDir, libsDir } = getWorkspaceLayout(tree);
-  const { name, projectType, directory, tags } = options;
-
-  const generatedNames = names(name);
-  const projectDirectory = directory
-    ? joinPathFragments(directory, generatedNames.fileName)
-    : generatedNames.fileName;
-  const projectName = projectDirectory.replace(/\//g, '-');
-  const projectRoot = `${
-    projectType === 'application' ? appsDir : libsDir
-  }/${projectDirectory}`;
-  const rootOffset = offsetFromRoot(projectRoot);
-  const parsedTags = tags?.split(',').map((s) => s.trim()) || [];
-  return {
-    ...options,
-    projectName,
-    projectRoot,
-    projectDirectory,
-    rootOffset,
-    parsedTags,
-  };
-};
+import type { BuildBackend, PythonGeneratorSchema } from './schema';
 
 export const pdmInitCommand = (
   projectType: ProjectType,
   buildBackend?: BuildBackend
 ) => {
-  let pdmInitCommand = 'init --non-interactive';
+  const pdmInitCommands = new Set<string>();
   if (projectType === 'library') {
-    pdmInitCommand += ' --lib';
+    pdmInitCommands.add('--lib');
   }
   if (buildBackend) {
-    pdmInitCommand += ` --backend=${buildBackend}`;
+    pdmInitCommands.add(`--backend=${buildBackend}`);
   }
-  return pdmInitCommand;
+  pdmInitCommands.add('--non-interactive');
+
+  return `init ${setJoin(pdmInitCommands, ' ')}`;
+};
+
+export const pdmInstallCommand = ({
+  linter,
+  typeChecker,
+  unitTestRunner,
+  e2eTestRunner,
+}: NormalizedOptions) => {
+  const pdmInstallCommands = new Set<string>(['setuptools']);
+  [
+    linter,
+    typeChecker,
+    pythonInstallableFilters.filterUnitTestRunner(unitTestRunner),
+    pythonInstallableFilters.filterE2ERunner(e2eTestRunner),
+  ]
+    // Remove undefined and 'none' values
+    .filter(
+      (pkg): pkg is Exclude<typeof pkg, undefined | 'none'> =>
+        pkg !== undefined && pkg !== 'none'
+    )
+    .forEach((pkg) => {
+      pdmInstallCommands.add(pkg);
+    });
+
+  if (pdmInstallCommands.size) {
+    return `add -d ${setJoin(pdmInstallCommands, ' ')}`;
+  }
+
+  return null;
+};
+
+// Only Cypress calls this function for now
+// as all others do not require any extra tasks.
+const addE2E = async (
+  tree: Tree,
+  { projectName }: NormalizedOptions
+): Promise<GeneratorCallback> => {
+  const { cypressE2EConfigurationGenerator } = ensurePackage<
+    typeof import('@nx/cypress')
+  >('@nx/cypress', NX_VERSION);
+
+  return await cypressE2EConfigurationGenerator(tree, {
+    project: projectName,
+    linter: nxLinter.EsLint,
+  });
 };
 
 export async function pythonGenerator(
   tree: Tree,
   options: PythonGeneratorSchema
 ) {
+  const endTasks: GeneratorCallback[] = [];
   const normalizedOptions = normalizeOptions(tree, options);
   const {
     buildBackend,
+    e2eTestRunner,
     parsedTags,
-    projectDirectory,
     projectName,
     projectRoot,
     projectType,
-    rootOffset,
   } = normalizedOptions;
+
+  // Add main project
   addProjectConfiguration(tree, projectName, {
     root: projectRoot,
     projectType: projectType,
     sourceRoot: projectRoot,
-    targets: {
-      build: {
-        executor: 'nx-python-pdm:pdm',
-        options: {
-          command: `build --dest=${rootOffset}dist/${projectDirectory}`,
-        },
-      },
-      pdm: {
-        executor: 'nx-python-pdm:pdm',
-      },
-    },
+    targets: getTargets(normalizedOptions),
     tags: parsedTags,
   });
 
@@ -102,18 +115,23 @@ export async function pythonGenerator(
     options
   );
 
-  dummyFiles.forEach((dummyFile) => {
+  DUMMY_FILES.forEach((dummyFile) => {
     tree.write(joinPathFragments(projectRoot, dummyFile), '');
   });
   tree.write(joinPathFragments(projectRoot, '.venv'), '');
   tree.write(joinPathFragments(projectRoot, '.pdm-python'), '');
   tree.write(joinPathFragments(projectRoot, '.gitignore'), '');
 
+  if (e2eTestRunner === 'cypress') {
+    endTasks.push(await addE2E(tree, normalizedOptions));
+  }
+
   await formatFiles(tree);
 
   return async () => {
+    // Initialize PDM specifics
     const cwd = joinPathFragments(tree.root, projectRoot);
-    dummyFiles.forEach((dummyFile) => {
+    DUMMY_FILES.forEach((dummyFile) => {
       rmSync(joinPathFragments(cwd, dummyFile));
     });
 
@@ -128,14 +146,33 @@ export async function pythonGenerator(
       .toString()
       // Add the project name
       .replace(/(^name\s*=\s*)("")/gm, `$1"${projectName}"`)
-      // Add the version
+      // Add the version if not present
       .replace(/(^version\s*=\s*)("")/gm, '$1"0.1.0"')
-      // Add the authors
+      // Add boilerplate to the authors list
       .replace(
         /(^authors\s*=\s*)(\[\s*\{name\s*=\s*"", email\s*=\s*""\},\s*\])/gm,
         '$1[\n    {name = "Your Name", email = "your@email.com"},\n]'
       );
     writeFileSync(tomlPath, pyprojectContent);
+
+    const installCommand = pdmInstallCommand(normalizedOptions);
+
+    if (installCommand) {
+      await pdm(installCommand, {
+        cwd,
+      });
+    }
+
+    if (normalizedOptions.typeChecker === 'pyre-check') {
+      // Initialize pyre
+      // Feed in aditional option for directory
+      const pyreInitCommand = `run pyre init <<EOF
+./src
+EOF`;
+      await pdm(pyreInitCommand, { cwd });
+    }
+
+    runTasksInSerial(...endTasks);
   };
 }
 

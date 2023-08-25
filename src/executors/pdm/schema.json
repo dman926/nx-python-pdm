@@ -24,6 +24,11 @@
       "type": "boolean",
       "description": "Do not prepend 'pdm ' to the given command.",
       "default": false
+    },
+    "quiet": {
+      "type": "boolean",
+      "description": "Suppress output to stdout. stderr will still be printed.",
+      "default": false
     }
   },
   "required": ["command"]
