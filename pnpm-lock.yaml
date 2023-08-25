@@ -8,9 +8,6 @@ dependencies:
   '@nx/devkit':
     specifier: 16.7.3
     version: 16.7.3(nx@16.7.3)
-  '@swc/helpers':
-    specifier: ~0.5.1
-    version: 0.5.1
   tslib:
     specifier: ^2.6.2
     version: 2.6.2
@@ -45,7 +42,7 @@ devDependencies:
     version: 0.1.62(@swc/core@1.3.78)
   '@swc/core':
     specifier: ~1.3.78
-    version: 1.3.78(@swc/helpers@0.5.1)
+    version: 1.3.78
   '@types/jest':
     specifier: ^29.5.4
     version: 29.5.4
@@ -2807,7 +2804,7 @@ packages:
     peerDependencies:
       '@swc/core': '>= 1.3'
     dependencies:
-      '@swc/core': 1.3.78(@swc/helpers@0.5.1)
+      '@swc/core': 1.3.78
 
   /@swc-node/register@1.4.2(@swc/core@1.3.78):
     resolution:
@@ -2849,7 +2846,7 @@ packages:
         optional: true
     dependencies:
       '@mole-inc/bin-wrapper': 8.0.1
-      '@swc/core': 1.3.78(@swc/helpers@0.5.1)
+      '@swc/core': 1.3.78
       commander: 7.2.0
       fast-glob: 3.3.1
       semver: 7.5.4
@@ -2967,7 +2964,7 @@ packages:
     requiresBuild: true
     optional: true
 
-  /@swc/core@1.3.78(@swc/helpers@0.5.1):
+  /@swc/core@1.3.78:
     resolution:
       {
         integrity: sha512-y6DQP571v7fbUUY7nz5G4lNIRGofuO48K5pGhD9VnuOCTuptfooCdi8wnigIrIhM/M4zQ53m/YCMDCbOtDgEww==,
@@ -2979,8 +2976,6 @@ packages:
     peerDependenciesMeta:
       '@swc/helpers':
         optional: true
-    dependencies:
-      '@swc/helpers': 0.5.1
     optionalDependencies:
       '@swc/core-darwin-arm64': 1.3.78
       '@swc/core-darwin-x64': 1.3.78
@@ -2992,14 +2987,6 @@ packages:
       '@swc/core-win32-arm64-msvc': 1.3.78
       '@swc/core-win32-ia32-msvc': 1.3.78
       '@swc/core-win32-x64-msvc': 1.3.78
-
-  /@swc/helpers@0.5.1:
-    resolution:
-      {
-        integrity: sha512-sJ902EfIzn1Fa+qYmjdQqh8tPsoxyBz+8yBKC2HKUxyezKJFwPGOn7pv4WY6QuQW//ySQi5lJjA/ZT9sNWWNTg==,
-      }
-    dependencies:
-      tslib: 2.6.2
 
   /@szmarczak/http-timer@4.0.6:
     resolution:
@@ -6712,7 +6699,7 @@ packages:
       '@nrwl/tao': 16.7.3(@swc-node/register@1.4.2)(@swc/core@1.3.78)
       '@parcel/watcher': 2.0.4
       '@swc-node/register': 1.4.2(@swc/core@1.3.78)
-      '@swc/core': 1.3.78(@swc/helpers@0.5.1)
+      '@swc/core': 1.3.78
       '@yarnpkg/lockfile': 1.1.0
       '@yarnpkg/parsers': 3.0.0-rc.46
       '@zkochan/js-yaml': 0.0.6
@@ -7865,7 +7852,7 @@ packages:
         optional: true
     dependencies:
       '@cspotcode/source-map-support': 0.8.1
-      '@swc/core': 1.3.78(@swc/helpers@0.5.1)
+      '@swc/core': 1.3.78
       '@tsconfig/node10': 1.0.9
       '@tsconfig/node12': 1.0.11
       '@tsconfig/node14': 1.0.3
