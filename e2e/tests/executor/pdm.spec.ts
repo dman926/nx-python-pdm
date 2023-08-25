@@ -14,9 +14,6 @@ const cleanup = async (name: string) => {
   );
 };
 
-const buildOutputPath = (name: string, fileName: string) =>
-  `dist/${name}/${fileName}`;
-
 describe('pdm executor', () => {
   beforeAll(() => {
     ensureNxProject('nx-python-pdm', 'dist/nx-python-pdm');
@@ -40,11 +37,8 @@ describe('pdm executor', () => {
 
     expect(() =>
       checkFilesExist(
-        buildOutputPath(name, `${name}-0.1.0.tar.gz`),
-        buildOutputPath(
-          name,
-          `${name.replace(/-/g, '_')}-0.1.0-py3-none-any.whl`
-        )
+        `dist/${name}/${name}-0.1.0.tar.gz`,
+        `dist/${name}/${name.replace(/-/g, '_')}-0.1.0-py3-none-any.whl`
       )
     ).not.toThrowWithAdditional(undefined, filesInDirectory.join('\n'));
     cleanup(name);
