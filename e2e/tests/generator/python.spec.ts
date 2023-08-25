@@ -161,19 +161,19 @@ describe('python generator', () => {
 
   describe('typeCheck target', () => {
     ['mypy', 'pyright', 'pyre-check'].forEach((typeChecker) => {
-      it.only(
+      it(
         `should be able to run type checking on generated projects with ${typeChecker}`,
         async () => {
           const name = uniq(`${typeChecker}-typeCheck-target-test`);
-          console.log(
-            await runNxCommandAsync(
-              `generate nx-python-pdm:python --name ${name} --typeChecker ${typeChecker} --no-interactive`
-            )
+          await runNxCommandAsync(
+            `generate nx-python-pdm:python --name ${name} --typeChecker ${typeChecker} --no-interactive`
           );
           names.push(name);
 
+          // !!! ISSUE: The NX Daemon can't find the project and resetting and/or waiting does nto resolve it. Not really sure what it is
           await new Promise((resolve) => setTimeout(resolve, 1000));
           await runNxCommandAsync('reset');
+          await runNxCommandAsync('clear-cache');
           await new Promise((resolve) => setTimeout(resolve, 1000));
 
           let output = '';

@@ -6,7 +6,7 @@ import {
 } from '@nx/plugin/testing';
 import { cleanup } from '../../util';
 
-describe.skip('pdm executor', () => {
+describe('pdm executor', () => {
   const names: string[] = [];
 
   beforeAll(() => {
