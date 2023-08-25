@@ -99,25 +99,29 @@ describe('python generator', () => {
 
   describe('test target', () => {
     ['unittest', 'pytest'].forEach((testRunner) => {
-      it(`should be able to run tests on generated projects with ${testRunner}`, async () => {
-        const name = uniq(`${testRunner}-test-target-test`);
-        await runNxCommandAsync(
-          `generate nx-python-pdm:python --name ${name} --unitTestRunner ${testRunner} --no-interactive`
-        );
-        names.push(name);
+      it(
+        `should be able to run tests on generated projects with ${testRunner}`,
+        async () => {
+          const name = uniq(`${testRunner}-test-target-test`);
+          await runNxCommandAsync(
+            `generate nx-python-pdm:python --name ${name} --unitTestRunner ${testRunner} --no-interactive`
+          );
+          names.push(name);
 
-        // Create dummy test file
-        const testFilePath = `apps/${name}/tests/test_dummy.py`;
-        await runCommandAsync(
-          `echo "def test_dummy():\\n    assert True" > ${testFilePath}`
-        );
+          // Create dummy test file
+          const testFilePath = `apps/${name}/tests/test_dummy.py`;
+          await runCommandAsync(
+            `echo "def test_dummy():\\n    assert True" > ${testFilePath}`
+          );
 
-        let output = '';
-        expect(() => {
-          output = runNxCommand(`test ${name}`);
-        }).not.toThrowWithAdditional(undefined, output);
-      });
-    }, 25 * 1000);
+          let output = '';
+          expect(() => {
+            output = runNxCommand(`test ${name}`);
+          }).not.toThrowWithAdditional(undefined, output);
+        },
+        10 * 1000
+      );
+    });
   });
 
   describe('lint target', () => {
