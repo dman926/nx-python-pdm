@@ -1,9 +1,13 @@
 {
   "name": "nx-python-pdm",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "license": "MIT",
   "scripts": {
     "check": "node tools/scripts/precheck.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dman926/nx-python-pdm.git"
   },
   "dependencies": {
     "@nx/devkit": "16.7.3",
