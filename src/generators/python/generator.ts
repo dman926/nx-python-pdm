@@ -167,7 +167,7 @@ export async function pythonGenerator(
       // Initialize pyre
       // Feed in aditional option for directory
       const pyreInitCommand = `run pyre init <<EOF
-./src",!__pycache__,!./.venv
+./src
 EOF`;
       await pdm(pyreInitCommand, { cwd });
     }

@@ -57,7 +57,7 @@ export const getTargets = ({
     serve: {
       executor,
       options: {
-        command: 'run main.py',
+        command: 'run src/main.py',
       },
     },
     test: {

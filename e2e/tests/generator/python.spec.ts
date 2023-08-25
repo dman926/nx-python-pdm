@@ -39,7 +39,7 @@ describe('python generator', () => {
     names.push(name);
     expect(() => {
       checkFilesExist(
-        ...['main.py', 'pyproject.toml'].map((el) => `${baseDir}/${el}`)
+        ...['src/main.py', 'pyproject.toml'].map((el) => `${baseDir}/${el}`)
       );
     }).not.toThrow();
   });
@@ -164,17 +164,11 @@ describe('python generator', () => {
       it(
         `should be able to run type checking on generated projects with ${typeChecker}`,
         async () => {
-          const name = uniq(`${typeChecker}-typeCheck-target-test`);
+          const name = uniq(`${typeChecker}-type-check-target-test`);
           await runNxCommandAsync(
             `generate nx-python-pdm:python --name ${name} --typeChecker ${typeChecker} --no-interactive`
           );
           names.push(name);
-
-          // !!! ISSUE: The NX Daemon can't find the project and resetting and/or waiting does nto resolve it. Not really sure what it is
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-          await runNxCommandAsync('reset');
-          await runNxCommandAsync('clear-cache');
-          await new Promise((resolve) => setTimeout(resolve, 1000));
 
           let output = '';
           expect(() => {
