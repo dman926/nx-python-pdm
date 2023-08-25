@@ -32,7 +32,7 @@
     "typeChecker": {
       "type": "string",
       "description": "The tool to use for running type checks.",
-      "enum": ["none", "mypy", "pyright", "pyre"],
+      "enum": ["none", "mypy", "pyright", "pyre-check"],
       "default": "none",
       "x-prompt": "Optionally add and initialize a type checker."
     },

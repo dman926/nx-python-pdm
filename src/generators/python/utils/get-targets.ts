@@ -106,8 +106,9 @@ export const getTargets = ({
           return 'run mypy ./**/*.py';
         }
         case 'pyright':
-        case 'pyre': {
-          return `run ${typeChecker}`;
+          return 'run pyright';
+        case 'pyre-check': {
+          return 'run pyre';
         }
         default: {
           throw new Error(`Unknown/unhandled linter: ${linter}`);

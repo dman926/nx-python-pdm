@@ -61,7 +61,6 @@ pnpm add -D nx-python-pdm
   - unitTestRunner: The tool to use for running unit tests.
     - unittest (default)
     - pytest
-    - pyre
   - directory: A diretory where the project is placed.
   - tags: Add tags to the project (used for linting).
 

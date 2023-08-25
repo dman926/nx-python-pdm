@@ -163,6 +163,15 @@ export async function pythonGenerator(
       });
     }
 
+    if (normalizedOptions.typeChecker === 'pyre-check') {
+      // Initialize pyre
+      // Feed in aditional option for directory
+      const pyreInitCommand = `run pyre init <<EOF
+./src",!__pycache__,!./.venv
+EOF`;
+      await pdm(pyreInitCommand, { cwd });
+    }
+
     runTasksInSerial(...endTasks);
   };
 }

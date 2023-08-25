@@ -9,6 +9,7 @@
     "jest.config.ts",
     "jest.d.ts",
     "test-setup.ts",
+    "util/index.ts",
     "tests/**/*.test.ts",
     "tests/**/*.spec.ts",
     "tests/**/*.d.ts"

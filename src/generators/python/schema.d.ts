@@ -5,7 +5,7 @@ type Optional<T> = 'none' | T;
 export type Linter = Optional<
   'pylint' | 'flake8' | 'pycodestyle' | 'pylama' | 'mypy'
 >;
-export type TypeChecker = Optional<'mypy' | 'pyright' | 'pyre'>;
+export type TypeChecker = Optional<'mypy' | 'pyright' | 'pyre-check'>;
 // Technically there is no 'none' option because `unittest` is part of the standard library
 export type UnitTestRunner = 'unittest' | 'pytest';
 export type E2ETestRunner = Optional<'cypress' | 'robotframework'>;
