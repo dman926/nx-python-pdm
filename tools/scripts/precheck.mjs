@@ -3,7 +3,7 @@ import chalk from 'chalk';
 import devkit from '@nx/devkit';
 const { getPackageManagerCommand } = devkit;
 
-const exec = getPackageManagerCommand().exec;
+const { exec } = getPackageManagerCommand();
 
 // Ran with `${exec} ${script}`
 const pnpmScripts = [
@@ -17,24 +17,34 @@ const pnpmScripts = [
 // Ran directly
 const scripts = [];
 
-const passed = pnpmScripts.concat(scripts).every((script) => {
+const failed = [];
+
+pnpmScripts.concat(scripts).forEach((script) => {
   try {
     console.log(chalk.bold.underline(`Running: \`${script}\``));
     execSync(script);
     console.log(chalk.bold.green(`\`${script}\` succeeded.`));
     console.log();
-    return true;
   } catch (error) {
     console.error(chalk.bold.red(`\`${script}\` failed.`));
     console.log();
-    return false;
+    failed.push(script);
   }
 });
 
-if (passed) {
-  console.log(chalk.bold.bgGreenBright('All checks pass!'));
+if (failed.length) {
+  const heavyMultiplication = '\u274C';
+  console.log(
+    chalk.bold.bgBlack(
+      `${heavyMultiplication} ${chalk.underline(
+        `${failed.length > 1 ? 'Checks' : 'A check'} failed!`
+      )}`
+    )
+  );
+  console.log(chalk.bold.red(failed.join('\n')));
 } else {
-  console.log(chalk.bold.bgRedBright('A check failed!'));
+  const heavyCheckMark = '\u2714';
+  console.log(chalk.bold.bgGreenBright(`${heavyCheckMark} All checks pass!`));
 }
 
 console.log();
