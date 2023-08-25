@@ -30,19 +30,23 @@ describe('python generator', () => {
     await runNxCommandAsync('reset');
   }, 60 * 1000);
 
-  it('should be able to generated project files', async () => {
-    const name = uniq('generate-proj');
-    const baseDir = `apps/${name}`;
-    await runNxCommandAsync(
-      `generate nx-python-pdm:python --name ${name} --no-interactive`
-    );
-    names.push(name);
-    expect(() => {
-      checkFilesExist(
-        ...['src/main.py', 'pyproject.toml'].map((el) => `${baseDir}/${el}`)
+  it(
+    'should be able to generated project files',
+    async () => {
+      const name = uniq('generate-proj');
+      const baseDir = `apps/${name}`;
+      await runNxCommandAsync(
+        `generate nx-python-pdm:python --name ${name} --no-interactive`
       );
-    }).not.toThrow();
-  }, 10 * 1000);
+      names.push(name);
+      expect(() => {
+        checkFilesExist(
+          ...['src/main.py', 'pyproject.toml'].map((el) => `${baseDir}/${el}`)
+        );
+      }).not.toThrow();
+    },
+    10 * 1000
+  );
 
   describe('build target', () => {
     it('should be able to build generated projects', async () => {

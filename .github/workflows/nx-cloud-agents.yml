@@ -94,7 +94,7 @@ jobs:
       - name: Setup PDM for Python ${{ inputs.python-version }}
         uses: pdm-project/setup-pdm@v3
         with:
-          python-version: ${{ inputs.python-version }}  # Version range or exact version of a Python version to use, the same as actions/setup-python
+          python-version: ${{ inputs.python-version }} # Version range or exact version of a Python version to use, the same as actions/setup-python
           update-python: true
 
       - name: Detect package manager
