@@ -76,7 +76,10 @@ pnpm add -D nx-python-pdm
   - _In progress. It technically works, but it is missing tests. It's also not created automatically by the python generator except for cypress_
 - pdm: Allows running arbitrary PDM commands in the project through NX.
 
-### Other TODOs
+### TODOs
 
 - Add [monorepo support](https://pdm.fming.dev/latest/usage/advanced/#use-pdm-to-manage-a-monorepo)
-- Update nx workflow versions
+- Complete work for E2E configurations.
+  - In-project cypress configuration is included
+  - In-project robotframework is installed, but not configured
+  - External E2E projects feature is not included.
