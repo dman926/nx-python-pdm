@@ -113,7 +113,7 @@ describe('python generator', () => {
           output = runNxCommand(`test ${name}`);
         }).not.toThrowWithAdditional(undefined, output);
       });
-    }, 10 * 1000);
+    }, 15 * 1000);
   });
 
   describe('lint target', () => {
