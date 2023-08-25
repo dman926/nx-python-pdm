@@ -88,10 +88,10 @@ const linters: { name: Linter; command?: string }[] = [
   { name: 'mypy', command: 'run mypy ./**/*.py --exclude .venv,__pycache__' },
 ];
 const typeCheckers: { name: TypeChecker; command?: string }[] = [
-  { name: 'none', command: 'run mypy ./**/*.py' },
-  { name: 'mypy', command: 'run mypy' },
+  { name: 'none' },
+  { name: 'mypy', command: 'run mypy ./**/*.py' },
   { name: 'pyright', command: 'run pyright' },
-  { name: 'pyre', command: 'run pyre' },
+  { name: 'pyre-check', command: 'run pyre' },
 ];
 const unitTestRunners: { name: UnitTestRunner; command?: string }[] = [
   { name: 'unittest', command: 'run python -m unittest discover .' },
