@@ -144,18 +144,22 @@ describe('python generator', () => {
     });
 
     ['pylint', 'flake8', 'pycodestyle', 'pylama', 'mypy'].forEach((linter) => {
-      it(`should be able to run linting on generated projects with ${linter}`, async () => {
-        const name = uniq(`${linter}-lint-target-test`);
-        await runNxCommandAsync(
-          `generate nx-python-pdm:python --name ${name} --linter ${linter} --no-interactive`
-        );
-        names.push(name);
+      it(
+        `should be able to run linting on generated projects with ${linter}`,
+        async () => {
+          const name = uniq(`${linter}-lint-target-test`);
+          await runNxCommandAsync(
+            `generate nx-python-pdm:python --name ${name} --linter ${linter} --no-interactive`
+          );
+          names.push(name);
 
-        let output = '';
-        expect(() => {
-          output = runNxCommand(`lint ${name}`);
-        }).not.toThrowWithAdditional(undefined, output);
-      }, 10 * 1000);
+          let output = '';
+          expect(() => {
+            output = runNxCommand(`lint ${name}`);
+          }).not.toThrowWithAdditional(undefined, output);
+        },
+        10 * 1000
+      );
     });
   });
 
