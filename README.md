@@ -2,20 +2,22 @@
 
 [![LICENSE](https://img.shields.io/badge/license-MIT-green)](https://github.com/dman926/nx-python-pdm/blob/main/LICENSE)
 [![CI](https://github.com/dman926/nx-python-pdm/actions/workflows/ci.yml/badge.svg)](https://github.com/dman926/nx-python-pdm/actions/workflows/ci.yml)
+[![GitHub package.json version (branch)](https://img.shields.io/github/package-json/v/dman926/nx-python-pdm/main)](https://github.com/dman926/nx-python-pdm/blob/main/package.json)
 
 Use Python in NX workspaces with PDM
 
-<!--
-Hidden since it's not published yet.
 ## Installation
+
 ```bash
-pnpm add -D nx-python-pdm
-## Or using yarn
-# yarn add -D nx-python-pdm
+## Using pnpm
+pnpm add -D @dman926/nx-python-pdm
+
 ## Or using npm
-# npm install -D nx-python-pdm
+npm install -D @dman926/nx-python-pdm
+
+## Or using yarn
+yarn add -D @dman926/nx-python-pdm
 ```
--->
 
 ## Prerequisites
 
@@ -68,7 +70,7 @@ pnpm add -D nx-python-pdm
 ### Targets
 
 - build: Build the project with PDM and move the built files to `dist/{project}/`
-- serve: Run `main.py` with PDM.
+- serve: Run `src/main.py` with PDM.
 - test: Run unit tests with the selected unit test runner.
 - lint: Run lint checks with the selected linter.
 - typeCheck: Run type checks with the selected tool.
