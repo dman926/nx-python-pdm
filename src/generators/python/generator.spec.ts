@@ -75,11 +75,17 @@ const mockWriteFileSync = jest.mocked(writeFileSync);
 
 const linters: { name: Linter; command?: string }[] = [
   { name: 'none' },
-  { name: 'pylint', command: 'run pylint ./**/*.py' },
-  { name: 'flake8', command: 'run flake8' },
-  { name: 'pycodestyle', command: 'run pycodestyle ./**/*.py' },
-  { name: 'pylama', command: 'run pylama' },
-  { name: 'mypy', command: 'run mypy ./**/*.py' },
+  {
+    name: 'pylint',
+    command: 'run pylint ./**/*.py --ignore=.venv,__pycache__',
+  },
+  { name: 'flake8', command: 'run flake8 --exclude .venv,__pycache__' },
+  {
+    name: 'pycodestyle',
+    command: 'run pycodestyle ./**/*.py --exclude=.venv,__pycache__',
+  },
+  { name: 'pylama', command: 'run pylama --skip .venv/**,__pycache__/**' },
+  { name: 'mypy', command: 'run mypy ./**/*.py --exclude .venv,__pycache__' },
 ];
 const typeCheckers: { name: TypeChecker; command?: string }[] = [
   { name: 'none', command: 'run mypy ./**/*.py' },
@@ -89,8 +95,7 @@ const typeCheckers: { name: TypeChecker; command?: string }[] = [
 ];
 const unitTestRunners: { name: UnitTestRunner; command?: string }[] = [
   { name: 'unittest', command: 'run python -m unittest discover .' },
-  { name: 'pytest', command: 'run pytest' },
-  { name: 'pyre', command: 'run pyre' },
+  { name: 'pytest', command: 'run pytest .' },
 ];
 // const e2eTestRunners: { name: E2ETestRunner; command?: string }[] = [
 //   { name: 'none' },
