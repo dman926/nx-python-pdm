@@ -91,10 +91,11 @@ jobs:
     steps:
       - uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # pin@v3
 
-      - name: Set up Python ${{ inputs.python-version }}
-        uses: actions/setup-python@v4
+      - name: Setup PDM for Python ${{ inputs.python-version }}
+        uses: pdm-project/setup-pdm@v3
         with:
-          python-version: ${{ inputs.python-version }}
+          python-version: ${{ inputs.python-version }}  # Version range or exact version of a Python version to use, the same as actions/setup-python
+          update-python: true
 
       - name: Detect package manager
         id: package_manager
