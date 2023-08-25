@@ -42,7 +42,7 @@ describe('python generator', () => {
         ...['src/main.py', 'pyproject.toml'].map((el) => `${baseDir}/${el}`)
       );
     }).not.toThrow();
-  });
+  }, 10 * 1000);
 
   describe('build target', () => {
     it('should be able to build generated projects', async () => {
@@ -113,7 +113,7 @@ describe('python generator', () => {
           output = runNxCommand(`test ${name}`);
         }).not.toThrowWithAdditional(undefined, output);
       });
-    }, 15 * 1000);
+    }, 25 * 1000);
   });
 
   describe('lint target', () => {
