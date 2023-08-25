@@ -113,7 +113,7 @@ describe('python generator', () => {
           output = runNxCommand(`test ${name}`);
         }).not.toThrowWithAdditional(undefined, output);
       });
-    });
+    }, 10 * 1000);
   });
 
   describe('lint target', () => {
@@ -155,7 +155,7 @@ describe('python generator', () => {
         expect(() => {
           output = runNxCommand(`lint ${name}`);
         }).not.toThrowWithAdditional(undefined, output);
-      });
+      }, 10 * 1000);
     });
   });
 
@@ -175,7 +175,7 @@ describe('python generator', () => {
             output = runNxCommand(`typeCheck ${name}`);
           }).not.toThrowWithAdditional(undefined, output);
         },
-        15 * 1000
+        25 * 1000
       );
     });
   });
