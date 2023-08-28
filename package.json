@@ -1,6 +1,6 @@
 {
   "name": "@dman926/nx-python-pdm",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "license": "MIT",
   "scripts": {
     "check": "node tools/scripts/precheck.mjs"
