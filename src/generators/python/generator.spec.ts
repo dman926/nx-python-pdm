@@ -1,9 +1,9 @@
 import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing';
 import {
   type Tree,
+  type ProjectType,
   joinPathFragments,
   readProjectConfiguration,
-  ProjectType,
 } from '@nx/devkit';
 import { writeFile } from 'fs/promises';
 
