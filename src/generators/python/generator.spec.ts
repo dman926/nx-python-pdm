@@ -25,8 +25,9 @@ jest.mock('../../pdm/pdm', () => ({
 
 jest.mock('fs/promises', () => {
   const mod = jest.requireActual<typeof import('fs/promises')>('fs/promises');
-  const basename = jest.requireActual('path').basename;
-  const dummyFiles = jest.requireActual('./dummyFiles').dummyFiles;
+  const basename = jest.requireActual<typeof import('path')>('path').basename;
+  const dummyFiles =
+    jest.requireActual<typeof import('./constants')>('./constants').DUMMY_FILES;
   return {
     ...mod,
     readFile: jest.fn(
@@ -41,7 +42,8 @@ jest.mock('fs/promises', () => {
           | null
       ): Promise<string | Buffer> => {
         const filename = basename(path.toString());
-        if (dummyFiles.includes(filename)) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        if (dummyFiles.includes(filename as any)) {
           let out: string | Buffer =
             '[tool.pdm]\n\n[project]\nname = ""\nversion = ""\ndescription = ""\nauthors = [\n    {name = "", email = ""},\n]\n';
           if (!options?.encoding) {
@@ -60,7 +62,8 @@ jest.mock('fs/promises', () => {
         options?: Parameters<typeof mod.writeFile>[2]
       ): ReturnType<typeof mod.writeFile> => {
         const filename = basename(file.toString());
-        if (dummyFiles.includes(filename)) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        if (dummyFiles.includes(filename as any)) {
           return Promise.resolve();
         } else {
           return mod.writeFile(file, data, options);
@@ -73,7 +76,8 @@ jest.mock('fs/promises', () => {
         options?: Parameters<typeof mod.rm>[1]
       ): ReturnType<typeof mod.rm> => {
         const filename = basename(path.toString());
-        if (dummyFiles.includes(filename)) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        if (dummyFiles.includes(filename as any)) {
           return Promise.resolve();
         } else {
           return mod.rm(path, options);
