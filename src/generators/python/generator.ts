@@ -104,7 +104,7 @@ export async function pythonGenerator(
     root: projectRoot,
     projectType: projectType,
     sourceRoot: projectRoot,
-    targets: getTargets(normalizedOptions),
+    targets: getTargets(tree, normalizedOptions),
     tags: parsedTags,
   });
 

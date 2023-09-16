@@ -1,4 +1,9 @@
-import type { TargetConfiguration } from '@nx/devkit';
+import {
+  getWorkspaceLayout,
+  type TargetConfiguration,
+  type Tree,
+  logger,
+} from '@nx/devkit';
 import type { NormalizedOptions } from './normalize-options';
 
 type PythonTarget =
@@ -24,14 +29,23 @@ type Targets = Partial<{
   [targetName in string]: TargetConfiguration<unknown>;
 };
 
-export const getTargets = ({
-  rootOffset,
-  projectDirectory,
-  unitTestRunner,
-  linter,
-  typeChecker,
-}: NormalizedOptions) => {
+export const getTargets = (
+  tree: Tree,
+  {
+    rootOffset,
+    projectType,
+    projectDirectory,
+    unitTestRunner,
+    linter,
+    typeChecker,
+  }: NormalizedOptions
+) => {
   const executor = 'nx-python-pdm:pdm';
+  const { appsDir, libsDir } = getWorkspaceLayout(tree);
+  const buildOutputPath = `${rootOffset}dist/${
+    projectType === 'application' ? appsDir : libsDir
+  }/${projectDirectory}`;
+  logger.log({ appsDir, libsDir, buildOutputPath });
   const testCommand = (() => {
     switch (unitTestRunner) {
       case 'unittest': {
@@ -51,7 +65,7 @@ export const getTargets = ({
     build: {
       executor,
       options: {
-        command: `build --dest=${rootOffset}dist/${projectDirectory}`,
+        command: `build --dest=${buildOutputPath}`,
       },
     },
     serve: {
