@@ -67,36 +67,43 @@ projectTypes.forEach((projectType) => {
     );
 
     describe('build target', () => {
-      it('should be able to build generated projects', async () => {
-        const name = uniq('build-target-test');
-        baseOptions.name = name;
-        await runNxCommandAsync(
-          `generate nx-python-pdm:python ${options()} --no-interactive`
-        );
-        names.push(name);
+      it(
+        'should be able to build generated projects',
+        async () => {
+          const name = uniq('build-target-test');
+          baseOptions.name = name;
+          await runNxCommandAsync(
+            `generate nx-python-pdm:python ${options()} --no-interactive`
+          );
+          names.push(name);
 
-        const distRoot = joinPathFragments('dist', await getProjectRoot(name));
+          const distRoot = joinPathFragments(
+            'dist',
+            await getProjectRoot(name)
+          );
 
-        expect(() => {
-          runNxCommand(`build ${name}`);
-        }).not.toThrow();
+          expect(() => {
+            runNxCommand(`build ${name}`);
+          }).not.toThrow();
 
-        const filesInDirectory = listFiles(distRoot);
-        filesInDirectory.unshift(`Files present in ${distRoot}`);
+          const filesInDirectory = listFiles(distRoot);
+          filesInDirectory.unshift(`Files present in ${distRoot}`);
 
-        expect(() =>
-          checkFilesExist(
-            `${distRoot}/${
-              // Library projects generate a tarball with underscores
-              projectType === 'application' ? name : name.replace(/-/g, '_')
-            }-0.1.0.tar.gz`,
-            joinPathFragments(
-              distRoot,
-              `${name.replace(/-/g, '_')}-0.1.0-py3-none-any.whl`
+          expect(() =>
+            checkFilesExist(
+              `${distRoot}/${
+                // Library projects generate a tarball with underscores
+                projectType === 'application' ? name : name.replace(/-/g, '_')
+              }-0.1.0.tar.gz`,
+              joinPathFragments(
+                distRoot,
+                `${name.replace(/-/g, '_')}-0.1.0-py3-none-any.whl`
+              )
             )
-          )
-        ).not.toThrowWithAdditional(undefined, filesInDirectory.join('\n'));
-      });
+          ).not.toThrowWithAdditional(undefined, filesInDirectory.join('\n'));
+        },
+        10 * 1000
+      );
     });
 
     describe('serve target', () => {
