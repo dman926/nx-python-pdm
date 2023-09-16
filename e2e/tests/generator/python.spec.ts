@@ -16,6 +16,10 @@ describe('python generator', () => {
     ensureNxProject('nx-python-pdm', 'dist/nx-python-pdm');
   });
 
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   afterAll(async () => {
     for (const name of names) {
       try {
@@ -116,7 +120,7 @@ describe('python generator', () => {
 
           let output = '';
           expect(() => {
-            output = runNxCommand(`test ${name}`);
+            output = runNxCommand(`test ${name} --quiet`);
           }).not.toThrowWithAdditional(undefined, output);
         },
         10 * 1000
@@ -132,7 +136,7 @@ describe('python generator', () => {
         command: '',
       },
       {
-        testName: 'when no linter is specified',
+        testName: 'when linter: "none" is specified',
         projectName: 'no-linter',
         command: ' --linter none',
       },
@@ -145,9 +149,14 @@ describe('python generator', () => {
         names.push(name);
 
         let output = '';
+        // Disable the console as it is expected to throw and NX will log it
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        jest.spyOn(console, 'log').mockImplementation(() => {});
         expect(() => {
           output = runNxCommand(`lint ${name}`);
         }).toThrowWithAdditional(undefined, output);
+
+        jest.spyOn(console, 'log').mockRestore();
       });
     });
 
@@ -184,7 +193,7 @@ describe('python generator', () => {
 
           let output = '';
           expect(() => {
-            output = runNxCommand(`typeCheck ${name}`);
+            output = runNxCommand(`typeCheck ${name} --quiet`);
           }).not.toThrowWithAdditional(undefined, output);
         },
         25 * 1000
