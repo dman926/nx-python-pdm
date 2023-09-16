@@ -1,9 +1,4 @@
-import {
-  getWorkspaceLayout,
-  type TargetConfiguration,
-  type Tree,
-  logger,
-} from '@nx/devkit';
+import type { TargetConfiguration, Tree } from '@nx/devkit';
 import type { NormalizedOptions } from './normalize-options';
 
 type PythonTarget =
@@ -33,19 +28,13 @@ export const getTargets = (
   tree: Tree,
   {
     rootOffset,
-    projectType,
-    projectDirectory,
+    projectRoot,
     unitTestRunner,
     linter,
     typeChecker,
   }: NormalizedOptions
 ) => {
   const executor = 'nx-python-pdm:pdm';
-  const { appsDir, libsDir } = getWorkspaceLayout(tree);
-  const buildOutputPath = `${rootOffset}dist/${
-    projectType === 'application' ? appsDir : libsDir
-  }/${projectDirectory}`;
-  logger.log({ appsDir, libsDir, buildOutputPath });
   const testCommand = (() => {
     switch (unitTestRunner) {
       case 'unittest': {
@@ -65,7 +54,7 @@ export const getTargets = (
     build: {
       executor,
       options: {
-        command: `build --dest=${buildOutputPath}`,
+        command: `build --dest=${rootOffset}dist/${projectRoot}`,
       },
     },
     serve: {

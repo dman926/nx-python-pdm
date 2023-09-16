@@ -16,3 +16,8 @@ export const getOptionString = (obj: object) =>
   Object.entries(obj)
     .map(([key, value]) => `--${key} ${value}`)
     .join(' ');
+
+export const getProjectRoot = (projectName: string) =>
+  runNxCommandAsync(`show project ${projectName} | jq -r '.root'`)
+    .then(({ stdout }) => stdout.trim())
+    .then((out) => (out !== '.' ? out : projectName));

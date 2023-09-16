@@ -1,4 +1,4 @@
-import { type ProjectType } from '@nx/devkit';
+import { joinPathFragments, type ProjectType } from '@nx/devkit';
 import {
   checkFilesExist,
   listFiles,
@@ -8,7 +8,7 @@ import {
   runCommandAsync,
   uniq,
 } from '@nx/plugin/testing';
-import { cleanup, getOptionString } from '../../util';
+import { cleanup, getOptionString, getProjectRoot } from '../../util';
 
 const projectTypes: ProjectType[] = ['library', 'application'];
 
@@ -19,8 +19,6 @@ projectTypes.forEach((projectType) => {
       name: '',
       projectType,
     };
-    const projectContainingFolder =
-      projectType === 'application' ? 'apps' : 'libs';
 
     // I'm lazy
     const options = () => getOptionString(baseOptions);
@@ -48,18 +46,20 @@ projectTypes.forEach((projectType) => {
     }, 60 * 1000);
 
     it(
-      'should be able to generated project files',
+      'should be able to generate project files',
       async () => {
         const name = uniq('generate-proj');
         baseOptions.name = name;
-        const baseDir = `${projectContainingFolder}/${name}`;
         await runNxCommandAsync(
           `generate nx-python-pdm:python ${options()} --no-interactive`
         );
         names.push(name);
+        const baseDir = await getProjectRoot(name);
         expect(() => {
           checkFilesExist(
-            ...['src/main.py', 'pyproject.toml'].map((el) => `${baseDir}/${el}`)
+            ...['src/main.py', 'pyproject.toml'].map((el) =>
+              joinPathFragments(baseDir, el)
+            )
           );
         }).not.toThrow();
       },
@@ -74,27 +74,26 @@ projectTypes.forEach((projectType) => {
           `generate nx-python-pdm:python ${options()} --no-interactive`
         );
         names.push(name);
+
+        const distRoot = joinPathFragments('dist', await getProjectRoot(name));
+
         expect(() => {
           runNxCommand(`build ${name}`);
         }).not.toThrow();
 
-        const filesInDirectory = listFiles(
-          `dist/${projectContainingFolder}/${name}`
-        );
-        filesInDirectory.unshift(
-          `Files present in dist/${projectContainingFolder}/${name}`
-        );
+        const filesInDirectory = listFiles(distRoot);
+        filesInDirectory.unshift(`Files present in ${distRoot}`);
 
         expect(() =>
           checkFilesExist(
-            `dist/${projectContainingFolder}/${name}/${
+            `${distRoot}/${
               // Library projects generate a tarball with underscores
               projectType === 'application' ? name : name.replace(/-/g, '_')
             }-0.1.0.tar.gz`,
-            `dist/${projectContainingFolder}/${name}/${name.replace(
-              /-/g,
-              '_'
-            )}-0.1.0-py3-none-any.whl`
+            joinPathFragments(
+              distRoot,
+              `${name.replace(/-/g, '_')}-0.1.0-py3-none-any.whl`
+            )
           )
         ).not.toThrowWithAdditional(undefined, filesInDirectory.join('\n'));
       });
@@ -140,7 +139,10 @@ projectTypes.forEach((projectType) => {
             names.push(name);
 
             // Create dummy test file
-            const testFilePath = `${projectContainingFolder}/${name}/tests/test_dummy.py`;
+            const testFilePath = joinPathFragments(
+              await getProjectRoot(name),
+              'tests/test_dummy.py'
+            );
             await runCommandAsync(
               `echo "def test_dummy():\\n    assert True" > ${testFilePath}`
             );

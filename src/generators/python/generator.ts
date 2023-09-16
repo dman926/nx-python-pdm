@@ -89,7 +89,7 @@ export async function pythonGenerator(
   options: PythonGeneratorSchema
 ) {
   const endTasks: GeneratorCallback[] = [];
-  const normalizedOptions = normalizeOptions(tree, options);
+  const normalizedOptions = await normalizeOptions(tree, options);
   const {
     buildBackend,
     e2eTestRunner,
