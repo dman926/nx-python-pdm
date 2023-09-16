@@ -16,11 +16,13 @@ export async function runpdm(
 
   return pdm(command, { cwd: cwd || projectRoot, raw })
     .then(({ stdout, stderr }) => {
-      if (!quiet && stdout) {
-        console.log(stdout);
-      }
-      if (stderr) {
-        console.error(stderr);
+      if (!quiet) {
+        if (stdout) {
+          console.log(stdout);
+        }
+        if (stderr) {
+          console.error(stderr);
+        }
       }
       return {
         success: true,

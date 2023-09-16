@@ -1,15 +1,14 @@
 import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing';
-import { Tree, joinPathFragments, readProjectConfiguration } from '@nx/devkit';
 import {
-  writeFileSync,
-  PathOrFileDescriptor,
-  WriteFileOptions,
-  PathLike,
-  RmOptions,
-} from 'fs';
+  type Tree,
+  type ProjectType,
+  joinPathFragments,
+  readProjectConfiguration,
+} from '@nx/devkit';
+import { writeFile } from 'fs/promises';
 
 import { pythonGenerator, pdmInitCommand } from './generator';
-import {
+import type {
   // E2ETestRunner,
   Linter,
   PythonGeneratorSchema,
@@ -17,61 +16,80 @@ import {
   UnitTestRunner,
 } from './schema';
 import { pdm } from '../../pdm/pdm';
+import type { OpenMode } from 'fs';
+import type { Abortable } from 'events';
 
 // Mock the pdm function
 jest.mock('../../pdm/pdm', () => ({
   pdm: jest.fn(() => Promise.resolve('pdm output')),
 }));
 
-jest.mock('fs', () => {
-  const mod = jest.requireActual('fs');
-  const basename = jest.requireActual('path').basename;
-  const dummyFiles = jest.requireActual('./dummyFiles').dummyFiles;
+jest.mock('fs/promises', () => {
+  const mod = jest.requireActual<typeof import('fs/promises')>('fs/promises');
+  const basename = jest.requireActual<typeof import('path')>('path').basename;
+  const dummyFiles =
+    jest.requireActual<typeof import('./constants')>('./constants').DUMMY_FILES;
   return {
     ...mod,
-    readFileSync: jest.fn(
+    readFile: jest.fn(
       (
-        path: PathOrFileDescriptor,
-        options?: {
-          encoding?: null | undefined;
-          flag?: string | undefined;
-        } | null
-      ) => {
+        path: Parameters<typeof mod.readFile>[0],
+        // Options needs type declared directly since typescript gives the wrong shape
+        options?:
+          | ({
+              encoding?: null | undefined;
+              flag?: OpenMode | undefined;
+            } & Abortable)
+          | null
+      ): Promise<string | Buffer> => {
         const filename = basename(path.toString());
-        if (dummyFiles.includes(filename)) {
-          return '[tool.pdm]\n\n[project]\nname = ""\nversion = ""\ndescription = ""\nauthors = [\n    {name = "", email = ""},\n]\n';
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        if (dummyFiles.includes(filename as any)) {
+          let out: string | Buffer =
+            '[tool.pdm]\n\n[project]\nname = ""\nversion = ""\ndescription = ""\nauthors = [\n    {name = "", email = ""},\n]\n';
+          if (!options?.encoding) {
+            out = Buffer.from(out);
+          }
+          return Promise.resolve(out);
         } else {
-          return mod.readFileSync(path, options);
+          return mod.readFile(path, options);
         }
       }
     ),
-    writeFileSync: jest.fn(
+    writeFile: jest.fn(
       (
-        file: PathOrFileDescriptor,
-        data: string | NodeJS.ArrayBufferView,
-        options?: WriteFileOptions
-      ) => {
+        file: Parameters<typeof mod.writeFile>[0],
+        data: Parameters<typeof mod.writeFile>[1],
+        options?: Parameters<typeof mod.writeFile>[2]
+      ): ReturnType<typeof mod.writeFile> => {
         const filename = basename(file.toString());
-        if (dummyFiles.includes(filename)) {
-          return;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        if (dummyFiles.includes(filename as any)) {
+          return Promise.resolve();
         } else {
-          return mod.writeFileSync(file, data, options);
+          return mod.writeFile(file, data, options);
         }
       }
     ),
-    rmSync: jest.fn((path: PathLike, options?: RmOptions) => {
-      const filename = basename(path.toString());
-      if (dummyFiles.includes(filename)) {
-        return;
-      } else {
-        return mod.rmSync(path, options);
+    rm: jest.fn(
+      (
+        path: Parameters<typeof mod.rm>[0],
+        options?: Parameters<typeof mod.rm>[1]
+      ): ReturnType<typeof mod.rm> => {
+        const filename = basename(path.toString());
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        if (dummyFiles.includes(filename as any)) {
+          return Promise.resolve();
+        } else {
+          return mod.rm(path, options);
+        }
       }
-    }),
+    ),
   };
 });
 
 const mockPdm = jest.mocked(pdm);
-const mockWriteFileSync = jest.mocked(writeFileSync);
+const mockWriteFile = jest.mocked(writeFile);
 
 const linters: { name: Linter; command?: string }[] = [
   { name: 'none' },
@@ -103,99 +121,111 @@ const unitTestRunners: { name: UnitTestRunner; command?: string }[] = [
 //   { name: 'robot', command: '' },
 // ];
 
-describe('python generator', () => {
-  let tree: Tree;
-  const options: PythonGeneratorSchema = {
-    name: 'test',
-    projectType: 'application',
-  };
-  const expectedPyprojectToml = `[tool.pdm]\n\n[project]\nname = "${options.name}"\nversion = "0.1.0"\ndescription = ""\nauthors = [\n    {name = "Your Name", email = "your@email.com"},\n]\n`;
-  const cwd = '/virtual/test';
+const projectTypes: ProjectType[] = ['library', 'application'];
 
-  beforeEach(() => {
-    tree = createTreeWithEmptyWorkspace();
-  });
+projectTypes.forEach((projectType) => {
+  describe(`python generator - ${projectType}`, () => {
+    let tree: Tree;
+    const options: PythonGeneratorSchema = {
+      name: 'test',
+      projectType,
+    };
+    const expectedPyprojectToml = `[tool.pdm]\n\n[project]\nname = "${options.name}"\nversion = "0.1.0"\ndescription = ""\nauthors = [\n    {name = "Your Name", email = "your@email.com"},\n]\n`;
+    const cwd = '/virtual/test';
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('should run successfully', async () => {
-    await pythonGenerator(tree, options);
-    const config = readProjectConfiguration(tree, 'test');
-    expect(config).toBeDefined();
-  });
-
-  it('should return a function that configures pdm', async () => {
-    const outputFn = await pythonGenerator(tree, options);
-    await outputFn();
-    // Inits PDM
-    expect(mockPdm).toBeCalledWith(pdmInitCommand(options.projectType), {
-      cwd,
+    beforeEach(() => {
+      tree = createTreeWithEmptyWorkspace();
     });
-    // Updates project name and version
-    expect(mockWriteFileSync).toBeCalledWith(
-      joinPathFragments(cwd, 'pyproject.toml'),
-      expectedPyprojectToml
-    );
-  });
 
-  it('should add a target for test with the correctly specified unit test runner', async () => {
-    for (const runner of unitTestRunners) {
-      tree = createTreeWithEmptyWorkspace();
-      const optionsWithAdditionalTarget: PythonGeneratorSchema = {
-        ...options,
-        unitTestRunner: runner.name,
-      };
-      await pythonGenerator(tree, optionsWithAdditionalTarget);
-      const config = readProjectConfiguration(tree, 'test');
-      expect(config.targets?.test).toBeDefined();
-      expect(config.targets?.test.options.command).toContain(runner.command);
-    }
-  });
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
 
-  it('should add a target for lint with the correctly specified linter', async () => {
-    for (const linter of linters) {
-      tree = createTreeWithEmptyWorkspace();
-      const optionsWithAdditionalTarget: PythonGeneratorSchema = {
-        ...options,
-        linter: linter.name,
-      };
-      await pythonGenerator(tree, optionsWithAdditionalTarget);
+    it('should run successfully', async () => {
+      await pythonGenerator(tree, options);
       const config = readProjectConfiguration(tree, 'test');
-      if (linter.name !== 'none') {
-        expect(config.targets?.lint).toBeDefined();
-        expect(config.targets?.lint.options.command).toContain(linter.command);
-      } else {
-        // When 'none' is specified, no lint target is added
-        expect(config.targets?.lint).not.toBeDefined();
+      expect(config).toBeDefined();
+    });
+
+    it('should return a function that configures pdm', async () => {
+      const outputFn = await pythonGenerator(tree, options);
+      await outputFn();
+      // Inits PDM
+      expect(mockPdm).toBeCalledWith(pdmInitCommand(options.projectType), {
+        cwd,
+      });
+      // Updates project name and version
+      expect(mockWriteFile).toBeCalledWith(
+        joinPathFragments(cwd, 'pyproject.toml'),
+        expectedPyprojectToml
+      );
+    });
+
+    it('should correctly configure the projectType', async () => {
+      await pythonGenerator(tree, options);
+      const config = readProjectConfiguration(tree, 'test');
+      expect(config.projectType).toBe(options.projectType);
+    });
+
+    it('should correctly add a target for test with the specified unit test runner', async () => {
+      for (const runner of unitTestRunners) {
+        tree = createTreeWithEmptyWorkspace();
+        const optionsWithAdditionalTarget: PythonGeneratorSchema = {
+          ...options,
+          unitTestRunner: runner.name,
+        };
+        await pythonGenerator(tree, optionsWithAdditionalTarget);
+        const config = readProjectConfiguration(tree, 'test');
+        expect(config.targets?.test).toBeDefined();
+        expect(config.targets?.test.options.command).toContain(runner.command);
       }
-    }
-  });
+    });
 
-  it('should add a target for type checking with the correctly specified type check runner', async () => {
-    for (const runner of typeCheckers) {
-      tree = createTreeWithEmptyWorkspace();
-      const optionsWithAdditionalTarget: PythonGeneratorSchema = {
-        ...options,
-        typeChecker: runner.name,
-      };
-      await pythonGenerator(tree, optionsWithAdditionalTarget);
-      const config = readProjectConfiguration(tree, 'test');
-      if (runner.name !== 'none') {
-        expect(config.targets?.typeCheck).toBeDefined();
-        expect(config.targets?.typeCheck.options.command).toContain(
-          runner.command
-        );
-      } else {
-        // When 'none' is specified, no typeCheck target is added
-        expect(config.targets?.typeCheck).not.toBeDefined();
+    it('should correctly add a target for lint with the specified linter', async () => {
+      for (const linter of linters) {
+        tree = createTreeWithEmptyWorkspace();
+        const optionsWithAdditionalTarget: PythonGeneratorSchema = {
+          ...options,
+          linter: linter.name,
+        };
+        await pythonGenerator(tree, optionsWithAdditionalTarget);
+        const config = readProjectConfiguration(tree, 'test');
+        if (linter.name !== 'none') {
+          expect(config.targets?.lint).toBeDefined();
+          expect(config.targets?.lint.options.command).toContain(
+            linter.command
+          );
+        } else {
+          // When 'none' is specified, no lint target is added
+          expect(config.targets?.lint).not.toBeDefined();
+        }
       }
-    }
-  });
+    });
 
-  // Skipping for now to merge to main. They technically get added. But they need to be tested.
-  it.skip('should add E2E configurations properly', () => {
-    expect('E2E TESTS NOT ADDED!').toBeFalsy();
+    it('should correctly add a target for type checking with the specified type check runner', async () => {
+      for (const runner of typeCheckers) {
+        tree = createTreeWithEmptyWorkspace();
+        const optionsWithAdditionalTarget: PythonGeneratorSchema = {
+          ...options,
+          typeChecker: runner.name,
+        };
+        await pythonGenerator(tree, optionsWithAdditionalTarget);
+        const config = readProjectConfiguration(tree, 'test');
+        if (runner.name !== 'none') {
+          expect(config.targets?.typeCheck).toBeDefined();
+          expect(config.targets?.typeCheck.options.command).toContain(
+            runner.command
+          );
+        } else {
+          // When 'none' is specified, no typeCheck target is added
+          expect(config.targets?.typeCheck).not.toBeDefined();
+        }
+      }
+    });
+
+    // Skipping for now to merge to main. They technically get added. But they need to be tested.
+    it.skip('TODO: should correctly add E2E configurations with the specified E2E runner', () => {
+      expect('E2E TESTS NOT ADDED!').toBeFalsy();
+    });
   });
 });

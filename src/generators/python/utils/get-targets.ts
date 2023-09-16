@@ -1,4 +1,4 @@
-import type { TargetConfiguration } from '@nx/devkit';
+import type { TargetConfiguration, Tree } from '@nx/devkit';
 import type { NormalizedOptions } from './normalize-options';
 
 type PythonTarget =
@@ -24,13 +24,16 @@ type Targets = Partial<{
   [targetName in string]: TargetConfiguration<unknown>;
 };
 
-export const getTargets = ({
-  rootOffset,
-  projectDirectory,
-  unitTestRunner,
-  linter,
-  typeChecker,
-}: NormalizedOptions) => {
+export const getTargets = (
+  tree: Tree,
+  {
+    rootOffset,
+    projectRoot,
+    unitTestRunner,
+    linter,
+    typeChecker,
+  }: NormalizedOptions
+) => {
   const executor = 'nx-python-pdm:pdm';
   const testCommand = (() => {
     switch (unitTestRunner) {
@@ -51,7 +54,7 @@ export const getTargets = ({
     build: {
       executor,
       options: {
-        command: `build --dest=${rootOffset}dist/${projectDirectory}`,
+        command: `build --dest=${rootOffset}dist/${projectRoot}`,
       },
     },
     serve: {

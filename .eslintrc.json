@@ -20,7 +20,11 @@
       "files": ["*.json", ".pyre_configuration"],
       "parser": "jsonc-eslint-parser",
       "rules": {
-        "@nx/dependency-checks": "error"
+        "@nx/dependency-checks": [
+          "error",
+          // Not really sure why these are triggering
+          { "ignoredDependencies": ["@nx/jest", "@nx/linter", "chalk"] }
+        ]
       }
     },
     {

@@ -11,7 +11,7 @@ import {
   GeneratorCallback,
 } from '@nx/devkit';
 import { Linter as nxLinter } from '@nx/linter';
-import { readFileSync, writeFileSync, rmSync } from 'fs';
+import { readFile, writeFile, rm } from 'fs/promises';
 import { DUMMY_FILES } from './constants';
 import {
   pythonInstallableFilters,
@@ -89,7 +89,7 @@ export async function pythonGenerator(
   options: PythonGeneratorSchema
 ) {
   const endTasks: GeneratorCallback[] = [];
-  const normalizedOptions = normalizeOptions(tree, options);
+  const normalizedOptions = await normalizeOptions(tree, options);
   const {
     buildBackend,
     e2eTestRunner,
@@ -104,7 +104,7 @@ export async function pythonGenerator(
     root: projectRoot,
     projectType: projectType,
     sourceRoot: projectRoot,
-    targets: getTargets(normalizedOptions),
+    targets: getTargets(tree, normalizedOptions),
     tags: parsedTags,
   });
 
@@ -128,32 +128,38 @@ export async function pythonGenerator(
 
   await formatFiles(tree);
 
+  // TODO: error handling to alert user better
   return async () => {
     // Initialize PDM specifics
     const cwd = joinPathFragments(tree.root, projectRoot);
-    DUMMY_FILES.forEach((dummyFile) => {
-      rmSync(joinPathFragments(cwd, dummyFile));
-    });
+    await Promise.all(
+      DUMMY_FILES.map((dummyFile) => rm(joinPathFragments(cwd, dummyFile)))
+    );
 
     await pdm(pdmInitCommand(projectType, buildBackend), {
       cwd,
     });
 
+    // MODIFYING pyproject.toml
     // Add project name, version, and authors as the minimum needed to build
     // PDM automatically gives project name and version for libraries, but applications do not for some reason
     const tomlPath = joinPathFragments(cwd, 'pyproject.toml');
-    const pyprojectContent = readFileSync(tomlPath)
-      .toString()
-      // Add the project name
-      .replace(/(^name\s*=\s*)("")/gm, `$1"${projectName}"`)
-      // Add the version if not present
-      .replace(/(^version\s*=\s*)("")/gm, '$1"0.1.0"')
-      // Add boilerplate to the authors list
-      .replace(
-        /(^authors\s*=\s*)(\[\s*\{name\s*=\s*"", email\s*=\s*""\},\s*\])/gm,
-        '$1[\n    {name = "Your Name", email = "your@email.com"},\n]'
-      );
-    writeFileSync(tomlPath, pyprojectContent);
+    readFile(tomlPath, {
+      encoding: 'utf-8',
+    })
+      .then((file) =>
+        file
+          // Add the project name
+          .replace(/(^name\s*=\s*)("")/gm, `$1"${projectName}"`)
+          // Add the version if not present
+          .replace(/(^version\s*=\s*)("")/gm, '$1"0.1.0"')
+          // Add boilerplate to the authors list
+          .replace(
+            /(^authors\s*=\s*)(\[\s*\{name\s*=\s*"", email\s*=\s*""\},\s*\])/gm,
+            '$1[\n    {name = "Your Name", email = "your@email.com"},\n]'
+          )
+      )
+      .then((outFile) => writeFile(tomlPath, outFile));
 
     const installCommand = pdmInstallCommand(normalizedOptions);
 
@@ -167,9 +173,22 @@ export async function pythonGenerator(
       // Initialize pyre
       // Feed in aditional option for directory
       const pyreInitCommand = `run pyre init <<EOF
-./src
+./
 EOF`;
       await pdm(pyreInitCommand, { cwd });
+
+      // MODIFYING .pyre_configuration
+      const exclude = ['.*/__pycache__/.*', '.*/.pyre/.*'];
+      const ignoreAllErrors = ['./.venv'];
+      const pyreconfPath = joinPathFragments(cwd, '.pyre_configuration');
+      await readFile(pyreconfPath, { encoding: 'utf-8' })
+        .then((file) => {
+          const fileJson = JSON.parse(file);
+          fileJson.exclude = exclude;
+          fileJson['ignore_all_errors'] = ignoreAllErrors;
+          return JSON.stringify(fileJson, null, 2);
+        })
+        .then((outFile) => writeFile(pyreconfPath, outFile));
     }
 
     runTasksInSerial(...endTasks);
