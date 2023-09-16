@@ -1,15 +1,13 @@
 import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing';
-import { Tree, joinPathFragments, readProjectConfiguration } from '@nx/devkit';
 import {
-  writeFileSync,
-  PathOrFileDescriptor,
-  WriteFileOptions,
-  PathLike,
-  RmOptions,
-} from 'fs';
+  type Tree,
+  joinPathFragments,
+  readProjectConfiguration,
+} from '@nx/devkit';
+import { writeFile } from 'fs/promises';
 
 import { pythonGenerator, pdmInitCommand } from './generator';
-import {
+import type {
   // E2ETestRunner,
   Linter,
   PythonGeneratorSchema,
@@ -17,61 +15,76 @@ import {
   UnitTestRunner,
 } from './schema';
 import { pdm } from '../../pdm/pdm';
+import type { OpenMode } from 'fs';
+import type { Abortable } from 'events';
 
 // Mock the pdm function
 jest.mock('../../pdm/pdm', () => ({
   pdm: jest.fn(() => Promise.resolve('pdm output')),
 }));
 
-jest.mock('fs', () => {
-  const mod = jest.requireActual('fs');
+jest.mock('fs/promises', () => {
+  const mod = jest.requireActual<typeof import('fs/promises')>('fs/promises');
   const basename = jest.requireActual('path').basename;
   const dummyFiles = jest.requireActual('./dummyFiles').dummyFiles;
   return {
     ...mod,
-    readFileSync: jest.fn(
+    readFile: jest.fn(
       (
-        path: PathOrFileDescriptor,
-        options?: {
-          encoding?: null | undefined;
-          flag?: string | undefined;
-        } | null
-      ) => {
+        path: Parameters<typeof mod.readFile>[0],
+        // Options needs type declared directly since typescript gives the wrong shape
+        options?:
+          | ({
+              encoding?: null | undefined;
+              flag?: OpenMode | undefined;
+            } & Abortable)
+          | null
+      ): Promise<string | Buffer> => {
         const filename = basename(path.toString());
         if (dummyFiles.includes(filename)) {
-          return '[tool.pdm]\n\n[project]\nname = ""\nversion = ""\ndescription = ""\nauthors = [\n    {name = "", email = ""},\n]\n';
+          let out: string | Buffer =
+            '[tool.pdm]\n\n[project]\nname = ""\nversion = ""\ndescription = ""\nauthors = [\n    {name = "", email = ""},\n]\n';
+          if (!options?.encoding) {
+            out = Buffer.from(out);
+          }
+          return Promise.resolve(out);
         } else {
-          return mod.readFileSync(path, options);
+          return mod.readFile(path, options);
         }
       }
     ),
-    writeFileSync: jest.fn(
+    writeFile: jest.fn(
       (
-        file: PathOrFileDescriptor,
-        data: string | NodeJS.ArrayBufferView,
-        options?: WriteFileOptions
-      ) => {
+        file: Parameters<typeof mod.writeFile>[0],
+        data: Parameters<typeof mod.writeFile>[1],
+        options?: Parameters<typeof mod.writeFile>[2]
+      ): ReturnType<typeof mod.writeFile> => {
         const filename = basename(file.toString());
         if (dummyFiles.includes(filename)) {
-          return;
+          return Promise.resolve();
         } else {
-          return mod.writeFileSync(file, data, options);
+          return mod.writeFile(file, data, options);
         }
       }
     ),
-    rmSync: jest.fn((path: PathLike, options?: RmOptions) => {
-      const filename = basename(path.toString());
-      if (dummyFiles.includes(filename)) {
-        return;
-      } else {
-        return mod.rmSync(path, options);
+    rm: jest.fn(
+      (
+        path: Parameters<typeof mod.rm>[0],
+        options?: Parameters<typeof mod.rm>[1]
+      ): ReturnType<typeof mod.rm> => {
+        const filename = basename(path.toString());
+        if (dummyFiles.includes(filename)) {
+          return Promise.resolve();
+        } else {
+          return mod.rm(path, options);
+        }
       }
-    }),
+    ),
   };
 });
 
 const mockPdm = jest.mocked(pdm);
-const mockWriteFileSync = jest.mocked(writeFileSync);
+const mockWriteFile = jest.mocked(writeFile);
 
 const linters: { name: Linter; command?: string }[] = [
   { name: 'none' },
@@ -134,7 +147,7 @@ describe('python generator', () => {
       cwd,
     });
     // Updates project name and version
-    expect(mockWriteFileSync).toBeCalledWith(
+    expect(mockWriteFile).toBeCalledWith(
       joinPathFragments(cwd, 'pyproject.toml'),
       expectedPyprojectToml
     );
