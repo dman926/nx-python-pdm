@@ -32,7 +32,7 @@ yarn add -D @dman926/nx-python-pdm
   - command\*: The command to run. 'pdm ' is prepended to this command.
   - cwd: Override where the command runs. By default, the command runs in the project root. If provided, it should be relative to the workspace root.
   - raw: Do not prepend `'pdm '` to the given command.
-  - quiet: Suppress output to stdout. stderr will still be printed.
+  - quiet: Suppress output to stdout. stderr will still be printed on process error.
 
 ### Generators
 
