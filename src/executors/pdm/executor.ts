@@ -14,26 +14,7 @@ export async function runpdm(
     context.projectsConfigurations.projects[context.projectName].root;
   const { command, cwd, raw, quiet } = options;
 
-  return pdm(command, { cwd: cwd || projectRoot, raw })
-    .then(({ stdout, stderr }) => {
-      if (!quiet) {
-        if (stdout) {
-          console.log(stdout);
-        }
-        if (stderr) {
-          console.error(stderr);
-        }
-      }
-      return {
-        success: true,
-      };
-    })
-    .catch((error) => {
-      console.error(error);
-      return {
-        success: false,
-      };
-    });
+  return pdm(command, { cwd: cwd || projectRoot, raw, quiet });
 }
 
 export default runpdm;

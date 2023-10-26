@@ -42,6 +42,8 @@ describe('pdm Executor', () => {
     await runpdm(options, mockContext);
     expect(mockpdm).toHaveBeenCalledWith('install', {
       cwd: '/path/to/project',
+      quiet: true,
+      raw: undefined,
     });
   });
 
@@ -53,6 +55,8 @@ describe('pdm Executor', () => {
     await runpdm(options, mockContext);
     expect(mockpdm).toHaveBeenCalledWith('run', {
       cwd: '/path/to/cwd',
+      quiet: true,
+      raw: undefined,
     });
   });
 
@@ -64,12 +68,16 @@ describe('pdm Executor', () => {
     await runpdm(options, mockContext);
     expect(mockpdm).toHaveBeenCalledWith('install', {
       cwd: '/path/to/project',
+      quiet: true,
       raw: true,
     });
   });
 
   it('should return an object with "success" set to true if pdm succeeds', async () => {
-    mockpdm.mockResolvedValueOnce({ stdout: 'pdm output', stderr: '' });
+    mockpdm.mockReturnValueOnce({
+      success: true,
+      stdout: Buffer.from('pdm output'),
+    });
     const options = getOptions({
       command: 'install',
     });
@@ -78,18 +86,13 @@ describe('pdm Executor', () => {
   });
 
   it('should return an object with "success" set to false if pdm fails', async () => {
-    const mockConsoleError = jest.fn();
-    jest.spyOn(console, 'error').mockImplementationOnce(mockConsoleError);
-
-    const error = new Error('pdm error');
-    mockpdm.mockRejectedValueOnce(error);
+    const error = { success: false };
+    mockpdm.mockReturnValueOnce(error);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const options = getOptions({
       command: 'install',
     });
     const result = await runpdm(options, mockContext);
     expect(result.success).toBe(false);
-    expect(mockConsoleError).toHaveBeenCalledWith(error);
-
-    jest.spyOn(console, 'error').mockRestore();
   });
 });
