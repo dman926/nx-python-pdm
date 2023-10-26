@@ -12,7 +12,7 @@
         "coverageDirectory": "coverage/e2e",
         "runInBand": true
       },
-      "dependsOn": ["nx-python-pdm:build"]
+      "dependsOn": ["@dman926/nx-python-pdm:build"]
     },
     "lint": {
       "executor": "@nx/eslint:lint",
@@ -23,5 +23,5 @@
     }
   },
   "tags": [],
-  "implicitDependencies": ["nx-python-pdm"]
+  "implicitDependencies": ["@dman926/nx-python-pdm"]
 }

@@ -16,7 +16,7 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "nx-python-pdm": ["src/index.ts"]
+      "@dman926/nx-python-pdm": ["src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

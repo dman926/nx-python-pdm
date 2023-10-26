@@ -1,6 +1,6 @@
 /* eslint-disable */
 export default {
-  displayName: 'nx-python-pdm',
+  displayName: '@dman926/nx-python-pdm',
   preset: './jest.preset.js',
   transform: {
     '^.+\\.[tj]s$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.spec.json' }],

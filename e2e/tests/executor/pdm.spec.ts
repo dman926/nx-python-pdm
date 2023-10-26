@@ -10,7 +10,7 @@ describe('pdm executor', () => {
   const names: string[] = [];
 
   beforeAll(() => {
-    ensureNxProject('nx-python-pdm', 'dist/nx-python-pdm');
+    ensureNxProject('@dman926/nx-python-pdm', 'dist/@dman926/nx-python-pdm');
   });
 
   afterAll(async () => {
@@ -30,7 +30,7 @@ describe('pdm executor', () => {
     const name = uniq('pdm-executor-test');
     names.push(name);
     await runNxCommandAsync(
-      `generate nx-python-pdm:python --name ${name} --no-interactive`
+      `generate @dman926/nx-python-pdm:python --name ${name} --no-interactive`
     );
 
     // pdm info

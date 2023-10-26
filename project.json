@@ -1,5 +1,5 @@
 {
-  "name": "nx-python-pdm",
+  "name": "@dman926/nx-python-pdm",
   "$schema": "node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "src",
   "projectType": "library",
@@ -8,7 +8,7 @@
       "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "outputPath": "dist/nx-python-pdm",
+        "outputPath": "dist/@dman926/nx-python-pdm",
         "main": "./src/index.ts",
         "tsConfig": "./tsconfig.lib.json",
         "assets": [
@@ -37,7 +37,7 @@
       }
     },
     "publish": {
-      "command": "node tools/scripts/publish.mjs nx-python-pdm {args.ver} {args.tag} {args.otp}",
+      "command": "node tools/scripts/publish.mjs @dman926/nx-python-pdm {args.ver} {args.tag} {args.otp}",
       "dependsOn": ["build"]
     },
     "lint": {
@@ -58,7 +58,7 @@
       "options": {
         "jestConfig": "jest.config.app.ts",
         "passWithNoTests": true,
-        "coverageDirectory": "./coverage/nx-python-pdm"
+        "coverageDirectory": "./coverage/@dman926/nx-python-pdm"
       },
       "configurations": {
         "ci": {

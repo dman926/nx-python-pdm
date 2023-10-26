@@ -42,7 +42,10 @@ devDependencies:
     version: 0.1.62(@swc/core@1.3.95)
   '@swc/core':
     specifier: 1.3.95
-    version: 1.3.95
+    version: 1.3.95(@swc/helpers@0.5.3)
+  '@swc/helpers':
+    specifier: ^0.5.3
+    version: 0.5.3
   '@types/jest':
     specifier: ^29.5.6
     version: 29.5.6
@@ -2762,7 +2765,7 @@ packages:
     peerDependencies:
       '@swc/core': '>= 1.3'
     dependencies:
-      '@swc/core': 1.3.95
+      '@swc/core': 1.3.95(@swc/helpers@0.5.3)
 
   /@swc-node/register@1.6.8(@swc/core@1.3.95)(typescript@5.1.6):
     resolution:
@@ -2775,7 +2778,7 @@ packages:
     dependencies:
       '@swc-node/core': 1.10.6(@swc/core@1.3.95)
       '@swc-node/sourcemap-support': 0.3.0
-      '@swc/core': 1.3.95
+      '@swc/core': 1.3.95(@swc/helpers@0.5.3)
       colorette: 2.0.20
       debug: 4.3.4
       pirates: 4.0.6
@@ -2808,7 +2811,7 @@ packages:
         optional: true
     dependencies:
       '@mole-inc/bin-wrapper': 8.0.1
-      '@swc/core': 1.3.95
+      '@swc/core': 1.3.95(@swc/helpers@0.5.3)
       commander: 7.2.0
       fast-glob: 3.3.1
       semver: 7.5.4
@@ -2926,7 +2929,7 @@ packages:
     requiresBuild: true
     optional: true
 
-  /@swc/core@1.3.95:
+  /@swc/core@1.3.95(@swc/helpers@0.5.3):
     resolution:
       {
         integrity: sha512-PMrNeuqIusq9DPDooV3FfNEbZuTu5jKAc04N3Hm6Uk2Fl49cqElLFQ4xvl4qDmVDz97n3n/C1RE0/f6WyGPEiA==,
@@ -2940,6 +2943,7 @@ packages:
         optional: true
     dependencies:
       '@swc/counter': 0.1.2
+      '@swc/helpers': 0.5.3
       '@swc/types': 0.1.5
     optionalDependencies:
       '@swc/core-darwin-arm64': 1.3.95
@@ -2958,6 +2962,14 @@ packages:
       {
         integrity: sha512-9F4ys4C74eSTEUNndnER3VJ15oru2NumfQxS8geE+f3eB5xvfxpWyqE5XlVnxb/R14uoXi6SLbBwwiDSkv+XEw==,
       }
+
+  /@swc/helpers@0.5.3:
+    resolution:
+      {
+        integrity: sha512-FaruWX6KdudYloq1AHD/4nU+UsMTdNE8CKyrseXWEcgjDAbvkwJg2QGPAnfIJLIWsjZOSPLOAykK6fuYp4vp4A==,
+      }
+    dependencies:
+      tslib: 2.6.2
 
   /@swc/types@0.1.5:
     resolution:
@@ -6701,7 +6713,7 @@ packages:
     dependencies:
       '@nrwl/tao': 17.0.2(@swc-node/register@1.6.8)(@swc/core@1.3.95)
       '@swc-node/register': 1.6.8(@swc/core@1.3.95)(typescript@5.1.6)
-      '@swc/core': 1.3.95
+      '@swc/core': 1.3.95(@swc/helpers@0.5.3)
       '@yarnpkg/lockfile': 1.1.0
       '@yarnpkg/parsers': 3.0.0-rc.46
       '@zkochan/js-yaml': 0.0.6
@@ -7859,7 +7871,7 @@ packages:
         optional: true
     dependencies:
       '@cspotcode/source-map-support': 0.8.1
-      '@swc/core': 1.3.95
+      '@swc/core': 1.3.95(@swc/helpers@0.5.3)
       '@tsconfig/node10': 1.0.9
       '@tsconfig/node12': 1.0.11
       '@tsconfig/node14': 1.0.3
