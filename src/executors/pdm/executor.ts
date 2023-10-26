@@ -11,7 +11,7 @@ export async function runpdm(
   }
 
   const projectRoot =
-    context.projectsConfigurations.projects[context.projectName].root;
+    `${context.root}/${context.projectsConfigurations.projects[context.projectName].root}`;
   const { command, cwd, raw, quiet } = options;
 
   return pdm(command, { cwd: cwd || projectRoot, raw, quiet });
