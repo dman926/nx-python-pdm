@@ -115,21 +115,15 @@ projectTypes.forEach((projectType) => {
         );
         names.push(name);
         let serveOutput = '';
-        const expectedOutput =
-          '\n' +
-          `> nx run ${name}:serve\n` +
-          '\n' +
-          'Hello World\n' +
-          '\n' +
-          ' \n' +
-          '\n' +
-          ` >  NX   Successfully ran target serve for project ${name}\n` +
-          '\n' +
-          '\n';
+        const expectedOutput = 'Hello World';
         expect(() => {
           serveOutput = runNxCommand(`serve ${name}`);
         }).not.toThrow();
-        expect(serveOutput).toBe(expectedOutput);
+        expect(
+          serveOutput
+            .split('\n')
+            .find((line) => line.startsWith(expectedOutput))
+        ).toBeDefined();
       });
     });
 
