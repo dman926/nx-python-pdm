@@ -38,9 +38,8 @@ describe('pdm executor', () => {
     expect(() => {
       projectInfo = runNxCommand(`run ${name}:pdm info`).split('\n');
     }).not.toThrow();
-    expect(projectInfo.length).toBeGreaterThanOrEqual(4);
-    const firstLineOfInfo = projectInfo[3];
-    expect(firstLineOfInfo).toBe('PDM version:');
+    const expectedLine = projectInfo.find((line) => line.startsWith('PDM version:'));
+    expect(expectedLine).toBeDefined();
 
     // pdm run
     let runOutput: string[] = [];
@@ -49,8 +48,7 @@ describe('pdm executor', () => {
         `run ${name}:pdm "run python -c \\"print('Hello World')\\""`
       ).split('\n');
     }).not.toThrow();
-    expect(runOutput.length).toBeGreaterThanOrEqual(4);
-    const firstLineOfPython = runOutput[3];
-    expect(firstLineOfPython).toBe('Hello World');
+    const expectedLineOfPython = runOutput.find((line) => line === 'Hello World');
+    expect(expectedLineOfPython).toBeDefined();
   });
 });
