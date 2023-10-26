@@ -10,7 +10,6 @@ import {
   runTasksInSerial,
   GeneratorCallback,
 } from '@nx/devkit';
-import { Linter as nxLinter } from '@nx/eslint';
 import { readFile, writeFile, rm } from 'fs/promises';
 import { DUMMY_FILES } from './constants';
 import {
@@ -77,6 +76,10 @@ const addE2E = async (
   const { cypressE2EConfigurationGenerator } = ensurePackage<
     typeof import('@nx/cypress')
   >('@nx/cypress', NX_VERSION);
+  const { Linter: nxLinter } = ensurePackage<typeof import('@nx/eslint')>(
+    '@nx/eslint',
+    NX_VERSION
+  );
 
   return await cypressE2EConfigurationGenerator(tree, {
     project: projectName,

@@ -46,7 +46,7 @@
       "options": {
         "lintFilePatterns": [
           "./**/*.ts",
-          "./package.json",
+          "package.json",
           "executors.json",
           "generators.json"
         ]
