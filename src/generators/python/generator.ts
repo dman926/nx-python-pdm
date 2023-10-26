@@ -10,7 +10,7 @@ import {
   runTasksInSerial,
   GeneratorCallback,
 } from '@nx/devkit';
-import { Linter as nxLinter } from '@nx/linter';
+import { Linter as nxLinter } from '@nx/eslint';
 import { readFile, writeFile, rm } from 'fs/promises';
 import { DUMMY_FILES } from './constants';
 import {

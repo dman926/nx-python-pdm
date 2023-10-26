@@ -23,7 +23,7 @@
         "@nx/dependency-checks": [
           "error",
           // Not really sure why these are triggering
-          { "ignoredDependencies": ["@nx/jest", "@nx/linter", "chalk"] }
+          { "ignoredDependencies": ["@nx/jest", "@nx/eslint", "chalk"] }
         ]
       }
     },
