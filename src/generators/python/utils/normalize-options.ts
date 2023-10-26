@@ -27,7 +27,7 @@ export const normalizeOptions = async (
   const generatedOptions = await determineProjectNameAndRootOptions(tree, {
     name,
     projectType,
-    callingGenerator: 'nx-python-pdm:python',
+    callingGenerator: '@dman926/nx-python-pdm:python',
     directory,
     rootProject: false,
     // projectNameAndRootFormat?: ProjectNameAndRootFormat;
