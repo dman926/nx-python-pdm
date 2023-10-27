@@ -32,6 +32,11 @@
             "input": ".",
             "glob": "executors.json",
             "output": "."
+          },
+          {
+            "input": "./.",
+            "glob": "migrations.json",
+            "output": "."
           }
         ]
       }
