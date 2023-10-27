@@ -22,7 +22,7 @@ yarn add -D @dman926/nx-python-pdm
 ## Prerequisites
 
 - An [NX workspace](https://nx.dev/)
-- [PDM](https://pdm.fming.dev/) must be available to run from the NX workspace.
+- [PDM](https://pdm.fming.dev/) must be available to run from a terminal in the NX workspace.
 
 ## Usage
 
@@ -30,7 +30,10 @@ yarn add -D @dman926/nx-python-pdm
 
 - pdm - Run a command with PDM on the project
   - command\*: The command to run. 'pdm ' is prepended to this command.
-  - cwd: Override where the command runs. By default, the command runs in the project root. If provided, it should be relative to the workspace root.
+    - The default input is used for command as well. It is important to note that the remainder of the PDM command must still be wrapped in quotes.
+    - Ex: `nx run my-project:pdm --command="add -d wheel"`
+    - Ex: `nx run my-project:pdm "add -d wheel"`
+  - cwd: Override where the command runs. By default, the command runs in the project root. If provided, it should be relative to the workspace root or an absolute path.
   - raw: Do not prepend `'pdm '` to the given command.
   - quiet: Suppress output to stdout. stderr will still be printed on process error.
 
@@ -41,7 +44,7 @@ yarn add -D @dman926/nx-python-pdm
   - projectType\*: Application or Library.
     - application (default)
     - library
-  - buildBackend: Override the default build backend.
+  - buildBackend: Override the PDM default build backend.
     - pdm-backend
     - setuptools
     - flot
@@ -77,6 +80,7 @@ yarn add -D @dman926/nx-python-pdm
 - e2e: Run end-to-end tests with the selected test runner.
   - _In progress. It technically works, but it is missing tests. It's also not created automatically by the python generator except for cypress_
 - pdm: Allows running arbitrary PDM commands in the project through NX.
+  - See [Executors](#Executors) for examples.
 
 ### TODOs
 
