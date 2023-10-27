@@ -23,7 +23,7 @@ const mockContext: ExecutorContext = {
   projectsConfigurations: {
     projects: {
       'my-project': {
-        root: '/path/to/project',
+        root: 'path/to/project',
       },
     },
     version: 2,
