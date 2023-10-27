@@ -10,30 +10,17 @@ export async function runpdm(
     throw new Error('Missing projectsConfigurations or projectName');
   }
 
-  const projectRoot =
-    context.projectsConfigurations.projects[context.projectName].root;
+  const projectRoot = `${context.root}/${
+    context.projectsConfigurations.projects[context.projectName].root
+  }`;
   const { command, cwd, raw, quiet } = options;
+  let cwdParsed: string | undefined;
+  if (cwd) {
+    // Provided CWD is an absolute path or relative to the workspace root
+    cwdParsed = cwd.startsWith('/') ? cwd : `${context.root}/${cwd}`;
+  }
 
-  return pdm(command, { cwd: cwd || projectRoot, raw })
-    .then(({ stdout, stderr }) => {
-      if (!quiet) {
-        if (stdout) {
-          console.log(stdout);
-        }
-        if (stderr) {
-          console.error(stderr);
-        }
-      }
-      return {
-        success: true,
-      };
-    })
-    .catch((error) => {
-      console.error(error);
-      return {
-        success: false,
-      };
-    });
+  return pdm(command, { cwd: cwdParsed || projectRoot, raw, quiet });
 }
 
 export default runpdm;

@@ -24,7 +24,7 @@ projectTypes.forEach((projectType) => {
     const options = () => getOptionString(baseOptions);
 
     beforeAll(() => {
-      ensureNxProject('nx-python-pdm', 'dist/nx-python-pdm');
+      ensureNxProject('@dman926/nx-python-pdm', 'dist/@dman926/nx-python-pdm');
     });
 
     afterEach(() => {
@@ -51,7 +51,7 @@ projectTypes.forEach((projectType) => {
         const name = uniq('generate-proj');
         baseOptions.name = name;
         await runNxCommandAsync(
-          `generate nx-python-pdm:python ${options()} --no-interactive`
+          `generate @dman926/nx-python-pdm:python ${options()} --no-interactive`
         );
         names.push(name);
         const baseDir = await getProjectRoot(name);
@@ -73,7 +73,7 @@ projectTypes.forEach((projectType) => {
           const name = uniq('build-target-test');
           baseOptions.name = name;
           await runNxCommandAsync(
-            `generate nx-python-pdm:python ${options()} --no-interactive`
+            `generate @dman926/nx-python-pdm:python ${options()} --no-interactive`
           );
           names.push(name);
 
@@ -111,25 +111,19 @@ projectTypes.forEach((projectType) => {
         const name = uniq('serve-target-test');
         baseOptions.name = name;
         await runNxCommandAsync(
-          `generate nx-python-pdm:python ${options()} --no-interactive`
+          `generate @dman926/nx-python-pdm:python ${options()} --no-interactive`
         );
         names.push(name);
         let serveOutput = '';
-        const expectedOutput =
-          '\n' +
-          `> nx run ${name}:serve\n` +
-          '\n' +
-          'Hello World\n' +
-          '\n' +
-          ' \n' +
-          '\n' +
-          ` >  NX   Successfully ran target serve for project ${name}\n` +
-          '\n' +
-          '\n';
+        const expectedOutput = 'Hello World';
         expect(() => {
           serveOutput = runNxCommand(`serve ${name}`);
         }).not.toThrow();
-        expect(serveOutput).toBe(expectedOutput);
+        expect(
+          serveOutput
+            .split('\n')
+            .find((line) => line.startsWith(expectedOutput))
+        ).toBeDefined();
       });
     });
 
@@ -141,7 +135,7 @@ projectTypes.forEach((projectType) => {
             const name = uniq(`${testRunner}-test-target-test`);
             baseOptions.name = name;
             await runNxCommandAsync(
-              `generate nx-python-pdm:python ${options()} --unitTestRunner ${testRunner} --no-interactive`
+              `generate @dman926/nx-python-pdm:python ${options()} --unitTestRunner ${testRunner} --no-interactive`
             );
             names.push(name);
 
@@ -181,7 +175,7 @@ projectTypes.forEach((projectType) => {
           const name = uniq(`${projectName}-lint-target-test`);
           baseOptions.name = name;
           await runNxCommandAsync(
-            `generate nx-python-pdm:python ${options()}${command} --no-interactive`
+            `generate @dman926/nx-python-pdm:python ${options()}${command} --no-interactive`
           );
           names.push(name);
 
@@ -205,7 +199,7 @@ projectTypes.forEach((projectType) => {
               const name = uniq(`${linter}-lint-target-test`);
               baseOptions.name = name;
               await runNxCommandAsync(
-                `generate nx-python-pdm:python ${options()} --linter ${linter} --no-interactive`
+                `generate @dman926/nx-python-pdm:python ${options()} --linter ${linter} --no-interactive`
               );
               names.push(name);
 
@@ -228,7 +222,7 @@ projectTypes.forEach((projectType) => {
             const name = uniq(`${typeChecker}-type-check-target-test`);
             baseOptions.name = name;
             await runNxCommandAsync(
-              `generate nx-python-pdm:python ${options()} --typeChecker ${typeChecker} --no-interactive`
+              `generate @dman926/nx-python-pdm:python ${options()} --typeChecker ${typeChecker} --no-interactive`
             );
             names.push(name);
 

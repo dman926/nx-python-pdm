@@ -153,6 +153,7 @@ projectTypes.forEach((projectType) => {
       // Inits PDM
       expect(mockPdm).toBeCalledWith(pdmInitCommand(options.projectType), {
         cwd,
+        quiet: true,
       });
       // Updates project name and version
       expect(mockWriteFile).toBeCalledWith(

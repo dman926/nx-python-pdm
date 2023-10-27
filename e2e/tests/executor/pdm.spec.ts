@@ -10,7 +10,7 @@ describe('pdm executor', () => {
   const names: string[] = [];
 
   beforeAll(() => {
-    ensureNxProject('nx-python-pdm', 'dist/nx-python-pdm');
+    ensureNxProject('@dman926/nx-python-pdm', 'dist/@dman926/nx-python-pdm');
   });
 
   afterAll(async () => {
@@ -30,7 +30,7 @@ describe('pdm executor', () => {
     const name = uniq('pdm-executor-test');
     names.push(name);
     await runNxCommandAsync(
-      `generate nx-python-pdm:python --name ${name} --no-interactive`
+      `generate @dman926/nx-python-pdm:python --name ${name} --no-interactive`
     );
 
     // pdm info
@@ -38,9 +38,10 @@ describe('pdm executor', () => {
     expect(() => {
       projectInfo = runNxCommand(`run ${name}:pdm info`).split('\n');
     }).not.toThrow();
-    expect(projectInfo.length).toBeGreaterThanOrEqual(4);
-    const firstLineOfInfo = projectInfo[3];
-    expect(firstLineOfInfo).toBe('PDM version:');
+    const expectedLine = projectInfo.find((line) =>
+      line.startsWith('PDM version:')
+    );
+    expect(expectedLine).toBeDefined();
 
     // pdm run
     let runOutput: string[] = [];
@@ -49,8 +50,9 @@ describe('pdm executor', () => {
         `run ${name}:pdm "run python -c \\"print('Hello World')\\""`
       ).split('\n');
     }).not.toThrow();
-    expect(runOutput.length).toBeGreaterThanOrEqual(4);
-    const firstLineOfPython = runOutput[3];
-    expect(firstLineOfPython).toBe('Hello World');
+    const expectedLineOfPython = runOutput.find(
+      (line) => line === 'Hello World'
+    );
+    expect(expectedLineOfPython).toBeDefined();
   });
 });

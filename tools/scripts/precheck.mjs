@@ -1,7 +1,6 @@
 import { execSync } from 'child_process';
 import chalk from 'chalk';
-import devkit from '@nx/devkit';
-const { getPackageManagerCommand } = devkit;
+import { getPackageManagerCommand } from '@nx/devkit';
 
 const { exec } = getPackageManagerCommand();
 

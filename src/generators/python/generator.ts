@@ -10,7 +10,6 @@ import {
   runTasksInSerial,
   GeneratorCallback,
 } from '@nx/devkit';
-import { Linter as nxLinter } from '@nx/linter';
 import { readFile, writeFile, rm } from 'fs/promises';
 import { DUMMY_FILES } from './constants';
 import {
@@ -20,7 +19,7 @@ import {
   normalizeOptions,
   type NormalizedOptions,
 } from './utils';
-import { pdm } from '../../pdm/pdm';
+import { PdmOptions, pdm } from '../../pdm/pdm';
 import type { BuildBackend, PythonGeneratorSchema } from './schema';
 
 export const pdmInitCommand = (
@@ -77,6 +76,10 @@ const addE2E = async (
   const { cypressE2EConfigurationGenerator } = ensurePackage<
     typeof import('@nx/cypress')
   >('@nx/cypress', NX_VERSION);
+  const { Linter: nxLinter } = ensurePackage<typeof import('@nx/eslint')>(
+    '@nx/eslint',
+    NX_VERSION
+  );
 
   return await cypressE2EConfigurationGenerator(tree, {
     project: projectName,
@@ -136,15 +139,18 @@ export async function pythonGenerator(
       DUMMY_FILES.map((dummyFile) => rm(joinPathFragments(cwd, dummyFile)))
     );
 
-    await pdm(pdmInitCommand(projectType, buildBackend), {
+    const defaultPDMOptions: Partial<PdmOptions> = {
       cwd,
-    });
+      quiet: true,
+    };
+
+    pdm(pdmInitCommand(projectType, buildBackend), defaultPDMOptions);
 
     // MODIFYING pyproject.toml
     // Add project name, version, and authors as the minimum needed to build
     // PDM automatically gives project name and version for libraries, but applications do not for some reason
     const tomlPath = joinPathFragments(cwd, 'pyproject.toml');
-    readFile(tomlPath, {
+    await readFile(tomlPath, {
       encoding: 'utf-8',
     })
       .then((file) =>
@@ -164,9 +170,7 @@ export async function pythonGenerator(
     const installCommand = pdmInstallCommand(normalizedOptions);
 
     if (installCommand) {
-      await pdm(installCommand, {
-        cwd,
-      });
+      pdm(installCommand, defaultPDMOptions);
     }
 
     if (normalizedOptions.typeChecker === 'pyre-check') {
@@ -175,7 +179,7 @@ export async function pythonGenerator(
       const pyreInitCommand = `run pyre init <<EOF
 ./
 EOF`;
-      await pdm(pyreInitCommand, { cwd });
+      pdm(pyreInitCommand, defaultPDMOptions);
 
       // MODIFYING .pyre_configuration
       const exclude = ['.*/__pycache__/.*', '.*/.pyre/.*'];

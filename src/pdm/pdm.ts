@@ -1,16 +1,16 @@
-import { exec } from 'child_process';
-import { promisify } from 'util';
+import { execSync } from 'child_process';
 
 export const LARGE_BUFFER = 1024 * 1000000;
 
 export interface PdmOptions {
   cwd: string;
   raw: boolean;
+  quiet: boolean;
 }
 
-export interface PdmOutput {
-  stdout: string;
-  stderr: string;
+export interface PdmResults {
+  success: boolean;
+  stdout?: Buffer;
 }
 
 /**
@@ -26,15 +26,32 @@ export interface PdmOutput {
  */
 export const pdm = (
   command: string,
-  { cwd, raw }: Partial<PdmOptions> = {}
-): Promise<PdmOutput> =>
-  promisify(exec)(`${raw ? '' : 'pdm '}${command}`, {
-    maxBuffer: LARGE_BUFFER,
-    env: process.env,
-    cwd,
-  }).then(({ stdout, stderr }) => ({
-    stdout: stdout.trim(),
-    stderr: stderr.trim(),
-  }));
+  { cwd, raw, quiet }: Partial<PdmOptions> = {}
+): PdmResults => {
+  const execute = raw ? command : `pdm ${command}`;
+
+  try {
+    if (!quiet) {
+      console.log(`Executing command: ${execute}`);
+    }
+    const stdout = execSync(execute, {
+      maxBuffer: LARGE_BUFFER,
+      env: process.env,
+      stdio: quiet ? 'ignore' : 'inherit',
+      cwd,
+    });
+    return {
+      success: true,
+      stdout,
+    };
+  } catch (e) {
+    if (!quiet) {
+      console.error(`Failed to execute command: ${execute}`, e);
+    }
+    return {
+      success: false,
+    };
+  }
+};
 
 export default pdm;

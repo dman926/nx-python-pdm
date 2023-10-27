@@ -17,18 +17,23 @@
       "rules": {}
     },
     {
-      "files": ["*.json", ".pyre_configuration"],
+      "files": ["*.json"],
       "parser": "jsonc-eslint-parser",
       "rules": {
         "@nx/dependency-checks": [
           "error",
           // Not really sure why these are triggering
-          { "ignoredDependencies": ["@nx/jest", "@nx/linter", "chalk"] }
+          { "ignoredDependencies": ["@nx/jest", "chalk"] }
         ]
       }
     },
     {
-      "files": ["./package.json", "./executors.json", "./generators.json"],
+      "files": [
+        "./package.json",
+        "./executors.json",
+        "./generators.json",
+        "./migrations.json"
+      ],
       "parser": "jsonc-eslint-parser",
       "rules": {
         "@nx/nx-plugin-checks": "error"

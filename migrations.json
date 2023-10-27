@@ -1,0 +1,24 @@
+{
+  "generators": {
+    "update-plugin-name": {
+      "version": "1.1.0",
+      "description": "Change references to package from 'nx-python-pdm' to '@dman926/nx-python-pdm'",
+      "implementation": "./src/migrations/update-1-1-0/update-plugin-name"
+    }
+  },
+  "packageJsonUpdates": {
+    "1.1.0": {
+      "version": "1.1.0",
+      "packages": {
+        "@nx/cypress": {
+          "version": "17.0.2",
+          "alwaysAddToPackageJson": false
+        },
+        "@nx/eslint": {
+          "version": "17.0.2",
+          "alwaysAddToPackageJson": false
+        }
+      }
+    }
+  }
+}

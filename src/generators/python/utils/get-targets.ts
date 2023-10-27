@@ -34,7 +34,7 @@ export const getTargets = (
     typeChecker,
   }: NormalizedOptions
 ) => {
-  const executor = 'nx-python-pdm:pdm';
+  const executor = '@dman926/nx-python-pdm:pdm';
   const testCommand = (() => {
     switch (unitTestRunner) {
       case 'unittest': {

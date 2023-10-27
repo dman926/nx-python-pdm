@@ -40,6 +40,10 @@
       "rules": {}
     },
     {
+      "files": ["*.json", ".pyre_configuration"],
+      "parser": "jsonc-eslint-parser"
+    },
+    {
       "files": ["*.mjs"],
       "parserOptions": {
         "sourceType": "module",

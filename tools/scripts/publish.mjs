@@ -11,9 +11,12 @@ import { execSync } from 'child_process';
 import { readFileSync, writeFileSync } from 'fs';
 import chalk from 'chalk';
 
-import devkit from '@nx/devkit';
-const { readCachedProjectGraph } = devkit;
+import { readCachedProjectGraph } from '@nx/devkit';
 
+/**
+ * @param {string | boolean | import("@nx/devkit").ProjectGraphProjectNode} condition
+ * @param {unknown} message
+ */
 function invariant(condition, message) {
   if (!condition) {
     console.error(chalk.bold.red(message));
