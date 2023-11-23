@@ -121,9 +121,6 @@ export async function pythonGenerator(
   DUMMY_FILES.forEach((dummyFile) => {
     tree.write(joinPathFragments(projectRoot, dummyFile), '');
   });
-  tree.write(joinPathFragments(projectRoot, '.venv'), '');
-  tree.write(joinPathFragments(projectRoot, '.pdm-python'), '');
-  tree.write(joinPathFragments(projectRoot, '.gitignore'), '');
 
   if (e2eTestRunner === 'cypress') {
     endTasks.push(await addE2E(tree, normalizedOptions));

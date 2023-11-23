@@ -72,8 +72,8 @@ yarn add -D @dman926/nx-python-pdm
 
 ### Targets
 
-- build: Build the project with PDM and move the built files to `dist/{project}/`
-- serve: Run `src/main.py` with PDM.
+- build: Build the project with PDM and move the built files to `dist/{projectRoot}/`
+- serve: Run `src` with PDM.
 - test: Run unit tests with the selected unit test runner.
 - lint: Run lint checks with the selected linter.
 - typeCheck: Run type checks with the selected tool.
@@ -84,7 +84,6 @@ yarn add -D @dman926/nx-python-pdm
 
 ### TODOs
 
-- Add [monorepo support](https://pdm.fming.dev/latest/usage/advanced/#use-pdm-to-manage-a-monorepo)
 - Complete work for E2E configurations.
   - In-project cypress configuration is included
   - In-project robotframework is installed, but not configured

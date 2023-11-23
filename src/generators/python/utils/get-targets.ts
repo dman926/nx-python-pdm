@@ -60,7 +60,7 @@ export const getTargets = (
     serve: {
       executor,
       options: {
-        command: 'run src/main.py',
+        command: 'run python -m src',
       },
     },
     test: {
@@ -126,7 +126,7 @@ export const getTargets = (
     };
   }
 
-  // Placed here to add to end of base target list since
+  // Placed here to add to end of base target list
   targets.pdm = {
     executor,
   };
