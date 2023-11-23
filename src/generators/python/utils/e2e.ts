@@ -41,6 +41,8 @@ export const addE2E = async (
         tags,
       });
     } else {
+      const desiredLinter = linter === 'none' ? nxLinter.None : nxLinter.EsLint;
+
       if (e2eTestRunner === 'cypress') {
         const { configurationGenerator } = ensurePackage<
           typeof import('@nx/cypress')
@@ -48,7 +50,7 @@ export const addE2E = async (
 
         return await configurationGenerator(tree, {
           project: projectName,
-          linter: nxLinter.EsLint,
+          linter: desiredLinter,
           directory: e2eDirectory,
           bundler: e2eBundler,
         });
@@ -59,7 +61,7 @@ export const addE2E = async (
 
         return await configurationGenerator(tree, {
           project: projectName,
-          linter: nxLinter.EsLint,
+          linter: desiredLinter,
           directory: '',
           js: false,
           skipFormat: false,
