@@ -1,6 +1,6 @@
 import { type Tree, offsetFromRoot } from '@nx/devkit';
 import {
-  ProjectNameAndRootFormat,
+  type ProjectNameAndRootFormat,
   determineProjectNameAndRootOptions,
 } from '@nx/devkit/src/generators/project-name-and-root-utils';
 import type {

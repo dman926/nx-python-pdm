@@ -6,6 +6,8 @@ import type { E2ETestRunner, UnitTestRunner } from '../schema';
 
 export * from './get-targets';
 export * from './normalize-options';
+export * from './e2e';
+export * from './pdmCommands';
 
 export const pythonInstallableFilters = {
   /**

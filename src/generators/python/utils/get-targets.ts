@@ -1,5 +1,6 @@
 import type { TargetConfiguration, Tree } from '@nx/devkit';
 import type { NormalizedOptions } from './normalize-options';
+import { isPythonE2ETestRunner } from '../constants';
 
 type PythonTarget =
   | 'build'
@@ -32,6 +33,8 @@ export const getTargets = (
     unitTestRunner,
     linter,
     typeChecker,
+    separateE2eProject,
+    e2eTestRunner,
   }: NormalizedOptions
 ) => {
   const executor = '@dman926/nx-python-pdm:pdm';
@@ -124,6 +127,18 @@ export const getTargets = (
         command: typeCheckCommand,
       },
     };
+  }
+
+  if (e2eTestRunner !== 'none' && !separateE2eProject) {
+    if (isPythonE2ETestRunner(e2eTestRunner)) {
+      targets.e2e = {
+        executor,
+        options: {
+          command: 'run python -m robot e2e',
+        },
+      };
+    }
+    // Node E2E runners should have the target added by the e2e generators
   }
 
   // Placed here to add to end of base target list

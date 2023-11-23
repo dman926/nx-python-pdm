@@ -5,9 +5,11 @@ import {
   joinPathFragments,
   readProjectConfiguration,
 } from '@nx/devkit';
+import type { Abortable } from 'events';
+import type { OpenMode } from 'fs';
 import { writeFile } from 'fs/promises';
 
-import { pythonGenerator, pdmInitCommand } from './generator';
+import { pythonGenerator } from './generator';
 import type {
   // E2ETestRunner,
   Linter,
@@ -16,8 +18,7 @@ import type {
   UnitTestRunner,
 } from './schema';
 import { pdm } from '../../pdm/pdm';
-import type { OpenMode } from 'fs';
-import type { Abortable } from 'events';
+import { pdmInitCommand } from './utils';
 
 // Mock the pdm function
 jest.mock('../../pdm/pdm', () => ({
@@ -118,6 +119,7 @@ const unitTestRunners: { name: UnitTestRunner; command?: string }[] = [
 // const e2eTestRunners: { name: E2ETestRunner; command?: string }[] = [
 //   { name: 'none' },
 //   { name: 'cypress', command: '' },
+//   { name: 'playwright', command: '' },
 //   { name: 'robot', command: '' },
 // ];
 
