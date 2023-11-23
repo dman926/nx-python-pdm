@@ -10,7 +10,8 @@
         "jestConfig": "e2e/jest.config.ts",
         "codeCoverage": true,
         "coverageDirectory": "coverage/e2e",
-        "runInBand": true
+        "runInBand": true,
+        "passWithNoTests": false
       },
       "dependsOn": ["@dman926/nx-python-pdm:build"]
     },
