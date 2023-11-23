@@ -11,14 +11,15 @@ import { writeFile } from 'fs/promises';
 
 import { pythonGenerator } from './generator';
 import type {
-  // E2ETestRunner,
   Linter,
   PythonGeneratorSchema,
   TypeChecker,
   UnitTestRunner,
+  E2ETestRunner,
 } from './schema';
 import { pdm } from '../../pdm/pdm';
-import { pdmInitCommand } from './utils';
+import { normalizeOptions, pdmInitCommand } from './utils';
+import { isNodeE2ETestRunner, isPythonE2ETestRunner } from './constants';
 
 // Mock the pdm function
 jest.mock('../../pdm/pdm', () => ({
@@ -116,12 +117,12 @@ const unitTestRunners: { name: UnitTestRunner; command?: string }[] = [
   { name: 'unittest', command: 'run python -m unittest discover .' },
   { name: 'pytest', command: 'run pytest .' },
 ];
-// const e2eTestRunners: { name: E2ETestRunner; command?: string }[] = [
-//   { name: 'none' },
-//   { name: 'cypress', command: '' },
-//   { name: 'playwright', command: '' },
-//   { name: 'robot', command: '' },
-// ];
+const e2eTestRunners: { name: E2ETestRunner; command?: string }[] = [
+  { name: 'none' },
+  { name: 'cypress' },
+  { name: 'playwright' },
+  { name: 'robotframework', command: 'run python -m robot e2e' },
+];
 
 const projectTypes: ProjectType[] = ['library', 'application'];
 
@@ -131,6 +132,7 @@ projectTypes.forEach((projectType) => {
     const options: PythonGeneratorSchema = {
       name: 'test',
       projectType,
+      separateE2eProject: false,
     };
     const expectedPyprojectToml = `[tool.pdm]\n\n[project]\nname = "${options.name}"\nversion = "0.1.0"\ndescription = ""\nauthors = [\n    {name = "Your Name", email = "your@email.com"},\n]\n`;
     const cwd = '/virtual/test';
@@ -150,15 +152,22 @@ projectTypes.forEach((projectType) => {
     });
 
     it('should return a function that configures pdm', async () => {
+      const normalizedOptions = await normalizeOptions(tree, options);
       const outputFn = await pythonGenerator(tree, options);
       await outputFn();
       // Inits PDM
-      expect(mockPdm).toBeCalledWith(pdmInitCommand(options.projectType), {
-        cwd,
-        quiet: true,
-      });
+      expect(mockPdm).toHaveBeenCalledWith(
+        pdmInitCommand(
+          normalizedOptions.projectType,
+          normalizedOptions.buildBackend
+        ),
+        {
+          cwd,
+          quiet: true,
+        }
+      );
       // Updates project name and version
-      expect(mockWriteFile).toBeCalledWith(
+      expect(mockWriteFile).toHaveBeenCalledWith(
         joinPathFragments(cwd, 'pyproject.toml'),
         expectedPyprojectToml
       );
@@ -226,9 +235,35 @@ projectTypes.forEach((projectType) => {
       }
     });
 
-    // Skipping for now to merge to main. They technically get added. But they need to be tested.
-    it.skip('TODO: should correctly add E2E configurations with the specified E2E runner', () => {
-      expect('E2E TESTS NOT ADDED!').toBeFalsy();
-    });
+    it(
+      'should correctly add E2E configurations with the specified E2E runner',
+      async () => {
+        for (const runner of e2eTestRunners) {
+          tree = createTreeWithEmptyWorkspace();
+          const optionsWithAdditionalTarget: PythonGeneratorSchema = {
+            ...options,
+            e2eTestRunner: runner.name,
+          };
+          await pythonGenerator(tree, optionsWithAdditionalTarget);
+          const config = readProjectConfiguration(tree, 'test');
+          
+          if (isPythonE2ETestRunner(runner.name)) {
+            expect(config.targets?.e2e).toBeDefined();
+            expect(config.targets?.e2e.options.command).toContain(
+              runner.command
+            );
+          } else if (isNodeE2ETestRunner(runner.name)) {
+            expect(config.targets?.e2e).toBeDefined();
+            expect(config.targets?.e2e.executor).toBe(
+              `@nx/${runner.name}:${runner.name}`
+            );
+          } else {
+            // When 'none' is specified, no e2e target is added
+            expect(config.targets?.e2e).not.toBeDefined();
+          }
+        }
+      },
+      10 * 1000
+    );
   });
 });
