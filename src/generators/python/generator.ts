@@ -11,7 +11,11 @@ import {
   GeneratorCallback,
 } from '@nx/devkit';
 import { readFile, writeFile, rm } from 'fs/promises';
-import { DUMMY_FILES } from './constants';
+import {
+  DUMMY_FILES,
+  isNodeE2ETestRunner,
+  isPythonE2ETestRunner,
+} from './constants';
 import {
   pythonInstallableFilters,
   getTargets,
@@ -75,49 +79,78 @@ const addE2E = async (
     e2eTestRunner,
     separateE2eProject,
     e2eDirectory,
+    e2eBundler,
     projectName,
+    linter,
+    tags: tagsInput,
   }: NormalizedOptions
 ): Promise<GeneratorCallback> => {
-  switch (e2eTestRunner) {
-    case 'cypress': {
-      const { Linter: nxLinter } = ensurePackage<typeof import('@nx/eslint')>(
-        '@nx/eslint',
+  const tags = `${tagsInput ? `${tagsInput},` : ''}e2e`;
+
+  if (isNodeE2ETestRunner(e2eTestRunner)) {
+    const { Linter: nxLinter } = ensurePackage<typeof import('@nx/eslint')>(
+      '@nx/eslint',
+      NX_VERSION
+    );
+
+    if (separateE2eProject) {
+      const { applicationGenerator } = ensurePackage<typeof import('@nx/web')>(
+        '@nx/web',
         NX_VERSION
       );
 
-      const { cypressE2EConfigurationGenerator, configurationGenerator } =
-        ensurePackage<typeof import('@nx/cypress')>('@nx/cypress', NX_VERSION);
+      await applicationGenerator(tree, {
+        name: `${projectName}-e2e`,
+        bundler: e2eBundler,
+        linter: nxLinter.EsLint,
+        e2eTestRunner,
+        tags,
+      });
+    } else {
+      if (e2eTestRunner === 'cypress') {
+        const { configurationGenerator } = ensurePackage<
+          typeof import('@nx/cypress')
+        >('@nx/cypress', NX_VERSION);
 
-      if (separateE2eProject) {
         return await configurationGenerator(tree, {
-          project: `${projectName}-e2e`,
-          linter: nxLinter.EsLint,
-          directory: e2eDirectory,
-          bundler: 'vite',
-        });
-      } else {
-        return await cypressE2EConfigurationGenerator(tree, {
           project: projectName,
           linter: nxLinter.EsLint,
-          bundler: 'vite',
+          directory: e2eDirectory,
+          bundler: e2eBundler,
+        });
+      } else if (e2eTestRunner === 'playwright') {
+        const { configurationGenerator } = ensurePackage<
+          typeof import('@nx/playwright')
+        >('@nx/playwright', NX_VERSION);
+
+        return await configurationGenerator(tree, {
+          project: projectName,
+          linter: nxLinter.EsLint,
+          directory: '',
+          js: false,
+          skipFormat: false,
+          skipPackageJson: false,
+          setParserOptionsProject: false,
         });
       }
     }
-    case 'robotframework': {
-      if (separateE2eProject) {
-        // Create a separate @dman926/nx-pdm-python:python project for E2E
-        // Add robot configuration to project
-        return () => {};
-      } else {
-        // Add robot configuration to project
-        return () => {};
-      }
+  } else if (isPythonE2ETestRunner(e2eTestRunner)) {
+    // Is a python E2E test runner. Use python project
+    if (separateE2eProject) {
+      // Create a separate @dman926/nx-pdm-python:python project for E2E
+      return await pythonGenerator(tree, {
+        name: `${projectName}-e2e`,
+        projectType: 'application',
+        e2eTestRunner: e2eTestRunner,
+        directory: e2eDirectory,
+        linter,
+        separateE2eProject: false,
+        tags,
+      });
     }
-    case 'none':
-      return () => {};
-    default:
-      throw new Error(`Unhandled e2e runner: ${e2eTestRunner}`);
+    // Otherwise do nothing since pythonGenerator GeneratorCallback will handle it
   }
+  return () => {};
 };
 
 export async function pythonGenerator(
@@ -224,6 +257,8 @@ EOF`;
         })
         .then((outFile) => writeFile(pyreconfPath, outFile));
     }
+
+    // TODO: configure E2E in project if `separateE2eProject` is false and is a python E2E runner
 
     runTasksInSerial(...endTasks);
   };

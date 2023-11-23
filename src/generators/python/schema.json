@@ -30,7 +30,7 @@
     "e2eTestRunner": {
       "type": "string",
       "description": "The tool to use for running E2E tests.",
-      "enum": ["none", "cypress", "robotframework"],
+      "enum": ["none", "cypress", "playwright", "robotframework"],
       "default": "none",
       "x-prompt": "Optionally add and initialize an project for an E2E runner."
     },
@@ -69,6 +69,12 @@
       "type": "boolean",
       "description": "Generate a separate E2E project.",
       "default": true
+    },
+    "e2eBundler": {
+      "type": "string",      
+      "description": "Generate a separate E2E project.",
+      "enum": ["none", "webpack", "vite"],
+      "default": "vite"
     },
     "tags": {
       "type": "string",

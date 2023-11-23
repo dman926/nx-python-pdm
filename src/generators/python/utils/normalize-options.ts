@@ -3,10 +3,23 @@ import {
   ProjectNameAndRootFormat,
   determineProjectNameAndRootOptions,
 } from '@nx/devkit/src/generators/project-name-and-root-utils';
-import type { PythonGeneratorSchema, UnitTestRunner } from '../schema';
+import type {
+  BuildBackend,
+  E2EBundler,
+  E2ETestRunner,
+  Linter,
+  PythonGeneratorSchema,
+  TypeChecker,
+  UnitTestRunner,
+} from '../schema';
 
 export interface NormalizedOptions extends PythonGeneratorSchema {
+  buildBackend: BuildBackend;
+  e2eTestRunner: E2ETestRunner;
+  linter: Linter;
+  typeChecker: TypeChecker;
   unitTestRunner: UnitTestRunner;
+  e2eBundler: E2EBundler;
   projectName: string;
   projectRoot: string;
   names: {
@@ -28,8 +41,13 @@ export const normalizeOptions = async (
     projectType,
     directory,
     tags,
+    buildBackend,
+    e2eTestRunner,
+    linter,
+    typeChecker,
     unitTestRunner,
     separateE2eProject,
+    e2eBundler,
   } = options;
   const generatedOptions = await determineProjectNameAndRootOptions(tree, {
     name,
@@ -45,7 +63,12 @@ export const normalizeOptions = async (
   return {
     ...options,
     // Apply default
+    buildBackend: buildBackend || 'pdm-backend',
+    e2eTestRunner: e2eTestRunner || 'none',
+    linter: linter || 'none',
+    typeChecker: typeChecker || 'none',
     unitTestRunner: unitTestRunner || 'unittest',
+    e2eBundler: e2eBundler || 'vite',
     ...generatedOptions,
     rootOffset,
     parsedTags,
