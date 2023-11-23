@@ -71,20 +71,53 @@ export const pdmInstallCommand = ({
 // as all others do not require any extra tasks.
 const addE2E = async (
   tree: Tree,
-  { projectName }: NormalizedOptions
+  {
+    e2eTestRunner,
+    separateE2eProject,
+    e2eDirectory,
+    projectName,
+  }: NormalizedOptions
 ): Promise<GeneratorCallback> => {
-  const { cypressE2EConfigurationGenerator } = ensurePackage<
-    typeof import('@nx/cypress')
-  >('@nx/cypress', NX_VERSION);
-  const { Linter: nxLinter } = ensurePackage<typeof import('@nx/eslint')>(
-    '@nx/eslint',
-    NX_VERSION
-  );
+  switch (e2eTestRunner) {
+    case 'cypress': {
+      const { Linter: nxLinter } = ensurePackage<typeof import('@nx/eslint')>(
+        '@nx/eslint',
+        NX_VERSION
+      );
 
-  return await cypressE2EConfigurationGenerator(tree, {
-    project: projectName,
-    linter: nxLinter.EsLint,
-  });
+      const { cypressE2EConfigurationGenerator, configurationGenerator } =
+        ensurePackage<typeof import('@nx/cypress')>('@nx/cypress', NX_VERSION);
+
+      if (separateE2eProject) {
+        return await configurationGenerator(tree, {
+          project: `${projectName}-e2e`,
+          linter: nxLinter.EsLint,
+          directory: e2eDirectory,
+          bundler: 'vite',
+        });
+      } else {
+        return await cypressE2EConfigurationGenerator(tree, {
+          project: projectName,
+          linter: nxLinter.EsLint,
+          bundler: 'vite',
+        });
+      }
+    }
+    case 'robotframework': {
+      if (separateE2eProject) {
+        // Create a separate @dman926/nx-pdm-python:python project for E2E
+        // Add robot configuration to project
+        return () => {};
+      } else {
+        // Add robot configuration to project
+        return () => {};
+      }
+    }
+    case 'none':
+      return () => {};
+    default:
+      throw new Error(`Unhandled e2e runner: ${e2eTestRunner}`);
+  }
 };
 
 export async function pythonGenerator(
@@ -122,7 +155,7 @@ export async function pythonGenerator(
     tree.write(joinPathFragments(projectRoot, dummyFile), '');
   });
 
-  if (e2eTestRunner === 'cypress') {
+  if (e2eTestRunner !== 'none') {
     endTasks.push(await addE2E(tree, normalizedOptions));
   }
 

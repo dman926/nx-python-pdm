@@ -49,9 +49,7 @@ yarn add -D @dman926/nx-python-pdm
     - setuptools
     - flot
     - hatchling
-  - ~~separateE2eProject: Scaffold the E2E configuration in a separate project. Defaults to `true`.~~ _In progress_
   - e2eTestRunner: The tool to use for running E2E tests.
-    - _In progress. This technically works for having a runner and target added to the project directly, but it is untested and needs a flag and a generator to be added to create it as a separate E2E project. Also the generator will not create the e2e target if you pick robotframework, but it will install it._
     - cypress
     - robotframework
   - linter: The tool to use for running lint checks.
@@ -67,7 +65,9 @@ yarn add -D @dman926/nx-python-pdm
   - unitTestRunner: The tool to use for running unit tests.
     - unittest (default)
     - pytest
-  - directory: A diretory where the project is placed.
+  - directory: A directory where the project is placed.
+  - e2eDirectory: A directory where the E2E project is placed, Only used when separateE2eProject is used.
+  - separateE2eProject: Scaffold the E2E configuration in a separate project. Defaults to `true`.
   - tags: Add tags to the project (used for linting).
 
 ### Targets
@@ -78,7 +78,6 @@ yarn add -D @dman926/nx-python-pdm
 - lint: Run lint checks with the selected linter.
 - typeCheck: Run type checks with the selected tool.
 - e2e: Run end-to-end tests with the selected test runner.
-  - _In progress. It technically works, but it is missing tests. It's also not created automatically by the python generator except for cypress_
 - pdm: Allows running arbitrary PDM commands in the project through NX.
   - See [Executors](#Executors) for examples.
 

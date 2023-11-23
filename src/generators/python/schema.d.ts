@@ -18,18 +18,22 @@ export interface PythonGeneratorSchema {
   name: string;
   // Application or Library.
   projectType: ProjectType;
+  // Override the default build backend.
+  buildBackend?: BuildBackend;
+  // Optionally add and initialize an project for an E2E runner. Default 'none'
+  e2eTestRunner?: E2ETestRunner;
   // Optionally add and initialize a linter. Default 'none'
   linter?: Linter;
   // Optionally add and initialize a type checker. Default 'none'
   typeChecker?: TypeChecker;
   // Optionally add and initialize a unit test runner. Default 'unittest'
   unitTestRunner?: UnitTestRunner;
-  // Optionally add and initialize an project for an E2E runner. Default 'none'
-  e2eTestRunner?: E2ETestRunner;
-  // Override the default build backend.
-  buildBackend?: BuildBackend;
   // A diretory where the project is placed.
   directory?: string;
+  // A directory where the E2E project is placed, Only used when separateE2eProject is used.
+  e2eDirectory?: string;
+  // Generate a separate E2E project.
+  separateE2eProject?: boolean;
   // Add tags to the project (used for linting).
   tags?: string;
 }
