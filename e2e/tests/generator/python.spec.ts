@@ -1,4 +1,4 @@
-import { joinPathFragments, logger, type ProjectType } from '@nx/devkit';
+import { joinPathFragments, type ProjectType } from '@nx/devkit';
 import {
   checkFilesExist,
   listFiles,
@@ -23,7 +23,8 @@ projectTypes.forEach((projectType) => {
     };
 
     // I'm lazy
-    const options = () => getOptionString(baseOptions);
+    const options = (overrides: object = {}) =>
+      getOptionString({ ...baseOptions, ...overrides });
 
     beforeAll(() => {
       ensureNxProject('@dman926/nx-python-pdm', 'dist/@dman926/nx-python-pdm');
@@ -272,28 +273,39 @@ projectTypes.forEach((projectType) => {
       });
 
       ['cypress', 'playwright', 'robotframework'].forEach((e2eTestRunner) => {
-        it(
-          `should be able to run E2E on generated projects with ${e2eTestRunner}`,
-          async () => {
-            const name = uniq(`${e2eTestRunner}-e2e-target-test`);
-            baseOptions.name = name;
-            await runNxCommandAsync(
-              `generate @dman926/nx-python-pdm:python ${options()} --e2eTestRunner ${e2eTestRunner} --no-interactive`
-            );
-            names.push(name);
+        [true, false].forEach((doSeparateE2eProject) => {
+          it(
+            `should be able to run E2E on generated projects with ${e2eTestRunner} ${
+              doSeparateE2eProject
+                ? 'in a separate project'
+                : 'in the same project'
+            }`,
+            async () => {
+              const name = uniq(
+                `${e2eTestRunner}-${doSeparateE2eProject}-e2e-target-test`
+              );
+              baseOptions.name = name;
+              await runNxCommandAsync(
+                `generate @dman926/nx-python-pdm:python ${options({
+                  separateE2eProject: doSeparateE2eProject,
+                })} --e2eTestRunner ${e2eTestRunner} --no-interactive`
+              );
+              names.push(name);
 
-            let output = '';
-            expect(() => {
-              try {
-                output = runNxCommand(`e2e ${name} --quiet`);
-              } catch (error) {
-                logger.error(error);
-                throw error;
+              let desiredName = name;
+              if (doSeparateE2eProject) {
+                desiredName = `${name}-e2e`;
+                names.push(desiredName);
               }
-            }).not.toThrowWithAdditional(undefined, output);
-          },
-          25 * 1000
-        );
+
+              let output = '';
+              expect(() => {
+                output = runNxCommand(`e2e ${desiredName} --quiet`);
+              }).not.toThrowWithAdditional(undefined, output);
+            },
+            25 * 1000
+          );
+        });
       });
     });
   });
