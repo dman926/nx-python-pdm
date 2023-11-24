@@ -169,13 +169,15 @@ test('sample test', async () => {
     if (separateE2eProject) {
       // Create a separate @dman926/nx-pdm-python:python project for E2E
       // Dynamic import to avoid circular dependency
-      return (await import('../generator')).pythonGenerator(tree, {
+      const { pythonGenerator } = await import('../generator');
+      return await pythonGenerator(tree, {
         name: `${projectName}-e2e`,
         projectType: 'application',
         e2eTestRunner: e2eTestRunner,
         directory: e2eDirectory,
         linter,
         separateE2eProject: false,
+        implicitDependencies: [projectName],
         tags,
       });
     }

@@ -21,9 +21,13 @@ import {
 import { type PdmOptions, pdm } from '../../pdm/pdm';
 import type { PythonGeneratorSchema } from './schema';
 
+interface InternalOptions {
+  implicitDependencies?: string[];
+}
+
 export async function pythonGenerator(
   tree: Tree,
-  options: PythonGeneratorSchema
+  options: PythonGeneratorSchema & InternalOptions
 ): Promise<GeneratorCallback> {
   const endTasks: GeneratorCallback[] = [];
   const normalizedOptions = await normalizeOptions(tree, options);
@@ -42,6 +46,7 @@ export async function pythonGenerator(
     projectType: projectType,
     sourceRoot: projectRoot,
     targets: getTargets(tree, normalizedOptions),
+    implicitDependencies: options.implicitDependencies,
     tags: parsedTags,
   });
 
@@ -158,7 +163,7 @@ Empty Test
       }
     }
 
-    runTasksInSerial(...endTasks);
+    await runTasksInSerial(...endTasks)();
 
     if (
       !(
