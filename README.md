@@ -1,8 +1,9 @@
 # @dman926/nx-python-pdm
 
 [![LICENSE](https://img.shields.io/badge/license-MIT-green)](https://github.com/dman926/nx-python-pdm/blob/main/LICENSE)
-[![CI](https://github.com/dman926/nx-python-pdm/actions/workflows/ci.yml/badge.svg)](https://github.com/dman926/nx-python-pdm/actions/workflows/ci.yml)
+[![npm (scoped with tag)](https://img.shields.io/npm/v/%40dman926/nx-python-pdm/latest)](https://www.npmjs.com/package/@dman926/nx-python-pdm)
 [![GitHub package.json version (branch)](https://img.shields.io/github/package-json/v/dman926/nx-python-pdm/main)](https://github.com/dman926/nx-python-pdm/blob/main/package.json)
+[![CI](https://github.com/dman926/nx-python-pdm/actions/workflows/ci.yml/badge.svg)](https://github.com/dman926/nx-python-pdm/actions/workflows/ci.yml)
 
 Use Python in NX workspaces with PDM
 
@@ -49,10 +50,9 @@ yarn add -D @dman926/nx-python-pdm
     - setuptools
     - flot
     - hatchling
-  - ~~separateE2eProject: Scaffold the E2E configuration in a separate project. Defaults to `true`.~~ _In progress_
   - e2eTestRunner: The tool to use for running E2E tests.
-    - _In progress. This technically works for having a runner and target added to the project directly, but it is untested and needs a flag and a generator to be added to create it as a separate E2E project. Also the generator will not create the e2e target if you pick robotframework, but it will install it._
     - cypress
+    - playwright
     - robotframework
   - linter: The tool to use for running lint checks.
     - pylint
@@ -67,25 +67,19 @@ yarn add -D @dman926/nx-python-pdm
   - unitTestRunner: The tool to use for running unit tests.
     - unittest (default)
     - pytest
-  - directory: A diretory where the project is placed.
+  - directory: A directory where the project is placed.
+  - e2eDirectory: A directory where the E2E project is placed, Only used when separateE2eProject is used.
+  - separateE2eProject: Scaffold the E2E configuration in a separate project. Defaults to `true`.
+  - e2eBundler: The bundler to use for running E2E tests. Only applies to cypress and playwright.
   - tags: Add tags to the project (used for linting).
 
 ### Targets
 
-- build: Build the project with PDM and move the built files to `dist/{project}/`
-- serve: Run `src/main.py` with PDM.
+- build: Build the project with PDM and move the built files to `dist/{projectRoot}/`
+- serve: Run `src` with PDM.
 - test: Run unit tests with the selected unit test runner.
 - lint: Run lint checks with the selected linter.
 - typeCheck: Run type checks with the selected tool.
 - e2e: Run end-to-end tests with the selected test runner.
-  - _In progress. It technically works, but it is missing tests. It's also not created automatically by the python generator except for cypress_
 - pdm: Allows running arbitrary PDM commands in the project through NX.
   - See [Executors](#Executors) for examples.
-
-### TODOs
-
-- Add [monorepo support](https://pdm.fming.dev/latest/usage/advanced/#use-pdm-to-manage-a-monorepo)
-- Complete work for E2E configurations.
-  - In-project cypress configuration is included
-  - In-project robotframework is installed, but not configured
-  - External E2E projects feature is not included.

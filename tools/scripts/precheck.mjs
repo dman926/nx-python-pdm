@@ -7,10 +7,10 @@ const { exec } = getPackageManagerCommand();
 // Ran with `${exec} ${script}`
 const pnpmScripts = [
   'nx format:check',
-  'nx affected -t=lint',
-  'nx affected -t=test',
-  'nx affected -t=build',
-  'nx affected -t=e2e',
+  'nx affected -t lint',
+  'nx affected -t test --coverage',
+  'nx affected -t build',
+  'nx affected -t e2e --coverage',
 ].map((script) => `${exec} ${script}`);
 
 // Ran directly

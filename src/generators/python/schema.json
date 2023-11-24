@@ -22,6 +22,18 @@
       "default": "application",
       "x-prompt": "Is this an application or library?"
     },
+    "buildBackend": {
+      "type": "string",
+      "description": "Override the default build backend.",
+      "enum": ["pdm-backend", "setuptools", "flot", "hatchling"]
+    },
+    "e2eTestRunner": {
+      "type": "string",
+      "description": "The tool to use for running E2E tests.",
+      "enum": ["none", "cypress", "playwright", "robotframework"],
+      "default": "none",
+      "x-prompt": "Optionally add and initialize an project for an E2E runner."
+    },
     "linter": {
       "type": "string",
       "description": "The tool to use for running lint checks.",
@@ -43,22 +55,26 @@
       "default": "unittest",
       "x-prompt": "Optionally add and initialize a unit test runner."
     },
-    "e2eTestRunner": {
-      "type": "string",
-      "description": "The tool to use for running E2E tests.",
-      "enum": ["none", "cypress", "robotframework"],
-      "default": "none",
-      "x-prompt": "Optionally add and initialize an project for an E2E runner."
-    },
-    "buildBackend": {
-      "type": "string",
-      "description": "Override the default build backend.",
-      "enum": ["pdm-backend", "setuptools", "flot", "hatchling"]
-    },
     "directory": {
       "type": "string",
-      "description": "A directory where the project is placed",
+      "description": "A directory where the project is placed.",
       "x-completion-type": "directory"
+    },
+    "e2eDirectory": {
+      "type": "string",
+      "description": "A directory where the E2E project is placed, Only used when separateE2eProject is used.",
+      "x-completion-type": "directory"
+    },
+    "separateE2eProject": {
+      "type": "boolean",
+      "description": "Generate a separate E2E project.",
+      "default": true
+    },
+    "e2eBundler": {
+      "type": "string",
+      "description": "The bundler to use for running E2E tests. Only applies to cypress and playwright.",
+      "enum": ["none", "webpack", "vite"],
+      "default": "vite"
     },
     "tags": {
       "type": "string",

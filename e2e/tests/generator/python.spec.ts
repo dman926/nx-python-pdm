@@ -18,10 +18,13 @@ projectTypes.forEach((projectType) => {
     const baseOptions = {
       name: '',
       projectType,
+      separateE2eProject: false,
+      tags: ['E2E-TESTING'],
     };
 
     // I'm lazy
-    const options = () => getOptionString(baseOptions);
+    const options = (overrides: object = {}) =>
+      getOptionString({ ...baseOptions, ...overrides });
 
     beforeAll(() => {
       ensureNxProject('@dman926/nx-python-pdm', 'dist/@dman926/nx-python-pdm');
@@ -57,7 +60,7 @@ projectTypes.forEach((projectType) => {
         const baseDir = await getProjectRoot(name);
         expect(() => {
           checkFilesExist(
-            ...['src/main.py', 'pyproject.toml'].map((el) =>
+            ...['src/__main__.py', 'pyproject.toml'].map((el) =>
               joinPathFragments(baseDir, el)
             )
           );
@@ -237,7 +240,73 @@ projectTypes.forEach((projectType) => {
     });
 
     describe('e2e target', () => {
-      // TODO
+      [
+        {
+          testName: 'when no E2E test runner is specified',
+          projectName: 'no-e2e-target',
+          command: '',
+        },
+        {
+          testName: 'when e2eTestRunner: "none" is specified',
+          projectName: 'no-e2e-target',
+          command: ' --e2eTestRunner none',
+        },
+      ].forEach(({ testName, projectName, command }) => {
+        it(`should not include an e2e target ${testName}`, async () => {
+          const name = uniq(`${projectName}-target-test`);
+          baseOptions.name = name;
+          await runNxCommandAsync(
+            `generate @dman926/nx-python-pdm:python ${options()}${command} --no-interactive`
+          );
+          names.push(name);
+
+          let output = '';
+          // Disable the console as it is expected to throw and NX will log it
+          // eslint-disable-next-line @typescript-eslint/no-empty-function
+          jest.spyOn(console, 'log').mockImplementation(() => {});
+          expect(() => {
+            output = runNxCommand(`e2e ${name}`);
+          }).toThrowWithAdditional(undefined, output);
+
+          jest.spyOn(console, 'log').mockRestore();
+        });
+      });
+
+      ['cypress', 'playwright', 'robotframework'].forEach((e2eTestRunner) => {
+        [true, false].forEach((doSeparateE2eProject) => {
+          it(
+            `should be able to run E2E on generated projects with ${e2eTestRunner} ${
+              doSeparateE2eProject
+                ? 'in a separate project'
+                : 'in the same project'
+            }`,
+            async () => {
+              const name = uniq(
+                `${e2eTestRunner}-${doSeparateE2eProject}-e2e-target-test`
+              );
+              baseOptions.name = name;
+              await runNxCommandAsync(
+                `generate @dman926/nx-python-pdm:python ${options({
+                  separateE2eProject: doSeparateE2eProject,
+                })} --e2eTestRunner ${e2eTestRunner} --no-interactive`
+              );
+              names.push(name);
+
+              let desiredName = name;
+              if (doSeparateE2eProject) {
+                desiredName = `${name}-e2e`;
+                names.push(desiredName);
+              }
+
+              let output = '';
+              expect(() => {
+                output = runNxCommand(`e2e ${desiredName} --quiet`);
+              }).not.toThrowWithAdditional(undefined, output);
+            },
+            25 * 1000
+          );
+        });
+      });
     });
   });
 });

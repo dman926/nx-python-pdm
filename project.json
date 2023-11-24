@@ -62,6 +62,7 @@
       "outputs": ["{workspaceRoot}/coverage/{projectName}"],
       "options": {
         "jestConfig": "jest.config.app.ts",
+        "codeCoverage": true,
         "coverageDirectory": "./coverage/@dman926/nx-python-pdm"
       }
     }

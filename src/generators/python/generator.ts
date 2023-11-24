@@ -1,96 +1,34 @@
 import {
+  type Tree,
+  type GeneratorCallback,
   addProjectConfiguration,
   formatFiles,
   generateFiles,
-  Tree,
   joinPathFragments,
-  ProjectType,
-  ensurePackage,
-  NX_VERSION,
   runTasksInSerial,
-  GeneratorCallback,
+  logger,
+  installPackagesTask,
 } from '@nx/devkit';
-import { readFile, writeFile, rm } from 'fs/promises';
-import { DUMMY_FILES } from './constants';
+import { readFile, writeFile, rm, mkdir } from 'fs/promises';
+import { DUMMY_FILES, isPythonE2ETestRunner } from './constants';
 import {
-  pythonInstallableFilters,
   getTargets,
-  setJoin,
   normalizeOptions,
-  type NormalizedOptions,
+  addE2E,
+  pdmInitCommand,
+  pdmInstallCommand,
 } from './utils';
-import { PdmOptions, pdm } from '../../pdm/pdm';
-import type { BuildBackend, PythonGeneratorSchema } from './schema';
+import { type PdmOptions, pdm } from '../../pdm/pdm';
+import type { PythonGeneratorSchema } from './schema';
 
-export const pdmInitCommand = (
-  projectType: ProjectType,
-  buildBackend?: BuildBackend
-) => {
-  const pdmInitCommands = new Set<string>();
-  if (projectType === 'library') {
-    pdmInitCommands.add('--lib');
-  }
-  if (buildBackend) {
-    pdmInitCommands.add(`--backend=${buildBackend}`);
-  }
-  pdmInitCommands.add('--non-interactive');
-
-  return `init ${setJoin(pdmInitCommands, ' ')}`;
-};
-
-export const pdmInstallCommand = ({
-  linter,
-  typeChecker,
-  unitTestRunner,
-  e2eTestRunner,
-}: NormalizedOptions) => {
-  const pdmInstallCommands = new Set<string>(['setuptools']);
-  [
-    linter,
-    typeChecker,
-    pythonInstallableFilters.filterUnitTestRunner(unitTestRunner),
-    pythonInstallableFilters.filterE2ERunner(e2eTestRunner),
-  ]
-    // Remove undefined and 'none' values
-    .filter(
-      (pkg): pkg is Exclude<typeof pkg, undefined | 'none'> =>
-        pkg !== undefined && pkg !== 'none'
-    )
-    .forEach((pkg) => {
-      pdmInstallCommands.add(pkg);
-    });
-
-  if (pdmInstallCommands.size) {
-    return `add -d ${setJoin(pdmInstallCommands, ' ')}`;
-  }
-
-  return null;
-};
-
-// Only Cypress calls this function for now
-// as all others do not require any extra tasks.
-const addE2E = async (
-  tree: Tree,
-  { projectName }: NormalizedOptions
-): Promise<GeneratorCallback> => {
-  const { cypressE2EConfigurationGenerator } = ensurePackage<
-    typeof import('@nx/cypress')
-  >('@nx/cypress', NX_VERSION);
-  const { Linter: nxLinter } = ensurePackage<typeof import('@nx/eslint')>(
-    '@nx/eslint',
-    NX_VERSION
-  );
-
-  return await cypressE2EConfigurationGenerator(tree, {
-    project: projectName,
-    linter: nxLinter.EsLint,
-  });
-};
+interface InternalOptions {
+  implicitDependencies?: string[];
+}
 
 export async function pythonGenerator(
   tree: Tree,
-  options: PythonGeneratorSchema
-) {
+  options: PythonGeneratorSchema & InternalOptions
+): Promise<GeneratorCallback> {
   const endTasks: GeneratorCallback[] = [];
   const normalizedOptions = await normalizeOptions(tree, options);
   const {
@@ -108,6 +46,7 @@ export async function pythonGenerator(
     projectType: projectType,
     sourceRoot: projectRoot,
     targets: getTargets(tree, normalizedOptions),
+    implicitDependencies: options.implicitDependencies,
     tags: parsedTags,
   });
 
@@ -121,17 +60,13 @@ export async function pythonGenerator(
   DUMMY_FILES.forEach((dummyFile) => {
     tree.write(joinPathFragments(projectRoot, dummyFile), '');
   });
-  tree.write(joinPathFragments(projectRoot, '.venv'), '');
-  tree.write(joinPathFragments(projectRoot, '.pdm-python'), '');
-  tree.write(joinPathFragments(projectRoot, '.gitignore'), '');
 
-  if (e2eTestRunner === 'cypress') {
+  if (e2eTestRunner !== 'none') {
     endTasks.push(await addE2E(tree, normalizedOptions));
   }
 
   await formatFiles(tree);
 
-  // TODO: error handling to alert user better
   return async () => {
     // Initialize PDM specifics
     const cwd = joinPathFragments(tree.root, projectRoot);
@@ -195,7 +130,55 @@ EOF`;
         .then((outFile) => writeFile(pyreconfPath, outFile));
     }
 
-    runTasksInSerial(...endTasks);
+    // Configure Python E2E in project
+    if (
+      !normalizedOptions.separateE2eProject &&
+      isPythonE2ETestRunner(normalizedOptions.e2eTestRunner)
+    ) {
+      switch (normalizedOptions.e2eTestRunner) {
+        case 'robotframework': {
+          // Add sample robot file
+          const e2eFolderPath = joinPathFragments(cwd, 'e2e');
+          const robotSampleFilePath = joinPathFragments(
+            e2eFolderPath,
+            'sample.robot'
+          );
+          const robotSampleFileContent = `*** Settings ***
+Documentation     This is a sample Robot Framework test file with no actions
+
+*** Test Cases ***
+Empty Test
+    [Documentation]    This test case does nothing
+    No Operation
+`;
+          await mkdir(e2eFolderPath, { recursive: true });
+          await writeFile(robotSampleFilePath, robotSampleFileContent);
+          break;
+        }
+        default:
+          logger.warn(
+            `Unhandled Python E2E runner: ${normalizedOptions.e2eTestRunner}`
+          );
+      }
+    }
+
+    await runTasksInSerial(...endTasks)();
+
+    if (
+      !(
+        normalizedOptions.tags?.includes('JEST-TEST') ||
+        normalizedOptions.tags?.includes('E2E-TEST')
+      )
+    ) {
+      logger.info(
+        `Project ${projectName} created at ${tree.root}/${projectRoot}`
+      );
+    }
+
+    // Special case where we don't want to run `npm install` in a jest test because it won't work
+    if (!normalizedOptions.tags?.includes('JEST-TEST')) {
+      installPackagesTask(tree);
+    }
   };
 }
 
