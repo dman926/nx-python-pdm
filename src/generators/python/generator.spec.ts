@@ -255,7 +255,7 @@ authors = [
           };
           await pythonGenerator(tree, optionsWithAdditionalTarget);
           const config = readProjectConfiguration(tree, 'test');
-          
+
           if (isPythonE2ETestRunner(runner.name)) {
             expect(config.targets?.e2e).toBeDefined();
             expect(config.targets?.e2e.options.command).toContain(

@@ -4,7 +4,9 @@ type Optional<T> = 'none' | T;
 
 // Technically there is no 'none' option because `pdm-backend` will always be default
 export type BuildBackend = 'pdm-backend' | 'setuptools' | 'flot' | 'hatchling';
-export type E2ETestRunner = Optional<'cypress' | 'playwright' | 'robotframework'>;
+export type E2ETestRunner = Optional<
+  'cypress' | 'playwright' | 'robotframework'
+>;
 export type Linter = Optional<
   'pylint' | 'flake8' | 'pycodestyle' | 'pylama' | 'mypy'
 >;

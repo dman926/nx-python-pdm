@@ -71,7 +71,7 @@
       "default": true
     },
     "e2eBundler": {
-      "type": "string",      
+      "type": "string",
       "description": "Generate a separate E2E project.",
       "enum": ["none", "webpack", "vite"],
       "default": "vite"
