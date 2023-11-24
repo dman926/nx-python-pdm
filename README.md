@@ -1,8 +1,9 @@
 # @dman926/nx-python-pdm
 
 [![LICENSE](https://img.shields.io/badge/license-MIT-green)](https://github.com/dman926/nx-python-pdm/blob/main/LICENSE)
-[![CI](https://github.com/dman926/nx-python-pdm/actions/workflows/ci.yml/badge.svg)](https://github.com/dman926/nx-python-pdm/actions/workflows/ci.yml)
+[![npm (scoped with tag)](https://img.shields.io/npm/v/%40dman926/nx-python-pdm/latest)](https://www.npmjs.com/package/@dman926/nx-python-pdm)
 [![GitHub package.json version (branch)](https://img.shields.io/github/package-json/v/dman926/nx-python-pdm/main)](https://github.com/dman926/nx-python-pdm/blob/main/package.json)
+[![CI](https://github.com/dman926/nx-python-pdm/actions/workflows/ci.yml/badge.svg)](https://github.com/dman926/nx-python-pdm/actions/workflows/ci.yml)
 
 Use Python in NX workspaces with PDM
 
@@ -51,6 +52,7 @@ yarn add -D @dman926/nx-python-pdm
     - hatchling
   - e2eTestRunner: The tool to use for running E2E tests.
     - cypress
+    - playwright
     - robotframework
   - linter: The tool to use for running lint checks.
     - pylint
@@ -68,6 +70,7 @@ yarn add -D @dman926/nx-python-pdm
   - directory: A directory where the project is placed.
   - e2eDirectory: A directory where the E2E project is placed, Only used when separateE2eProject is used.
   - separateE2eProject: Scaffold the E2E configuration in a separate project. Defaults to `true`.
+  - e2eBundler: The bundler to use for running E2E tests. Only applies to cypress and playwright.
   - tags: Add tags to the project (used for linting).
 
 ### Targets

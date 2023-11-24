@@ -72,7 +72,7 @@
     },
     "e2eBundler": {
       "type": "string",
-      "description": "Generate a separate E2E project.",
+      "description": "The bundler to use for running E2E tests. Only applies to cypress and playwright.",
       "enum": ["none", "webpack", "vite"],
       "default": "vite"
     },

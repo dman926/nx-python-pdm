@@ -36,7 +36,7 @@ export interface PythonGeneratorSchema {
   e2eDirectory?: string;
   // Generate a separate E2E project.
   separateE2eProject?: boolean;
-  // Set the bundler to use for cypress or webpack.
+  // The bundler to use for running E2E tests. Only applies to cypress and playwright.
   e2eBundler?: E2EBundler;
   // Add tags to the project (used for linting).
   tags?: string;
