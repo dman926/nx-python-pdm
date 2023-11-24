@@ -59,7 +59,7 @@ projectTypes.forEach((projectType) => {
         const baseDir = await getProjectRoot(name);
         expect(() => {
           checkFilesExist(
-            ...['src/main.py', 'pyproject.toml'].map((el) =>
+            ...['src/__main__.py', 'pyproject.toml'].map((el) =>
               joinPathFragments(baseDir, el)
             )
           );
@@ -273,7 +273,7 @@ projectTypes.forEach((projectType) => {
 
       ['cypress', 'playwright', 'robotframework'].forEach((e2eTestRunner) => {
         it(
-          `should be able to run type checking on generated projects with ${e2eTestRunner}`,
+          `should be able to run E2E on generated projects with ${e2eTestRunner}`,
           async () => {
             const name = uniq(`${e2eTestRunner}-e2e-target-test`);
             baseOptions.name = name;

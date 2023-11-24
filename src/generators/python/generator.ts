@@ -24,7 +24,7 @@ import type { PythonGeneratorSchema } from './schema';
 export async function pythonGenerator(
   tree: Tree,
   options: PythonGeneratorSchema
-) {
+): Promise<GeneratorCallback> {
   const endTasks: GeneratorCallback[] = [];
   const normalizedOptions = await normalizeOptions(tree, options);
   const {
@@ -136,8 +136,7 @@ EOF`;
           // Add sample robot file
           const e2eFolderPath = joinPathFragments(cwd, 'e2e');
           const robotSampleFilePath = joinPathFragments(
-            cwd,
-            'e2e',
+            e2eFolderPath,
             'sample.robot'
           );
           const robotSampleFileContent = `*** Settings ***
@@ -161,10 +160,19 @@ Empty Test
 
     runTasksInSerial(...endTasks);
 
-    if (process.env.NODE_ENV !== 'test') {
+    if (
+      !(
+        normalizedOptions.tags?.includes('JEST-TEST') ||
+        normalizedOptions.tags?.includes('E2E-TEST')
+      )
+    ) {
       logger.info(
         `Project ${projectName} created at ${tree.root}/${projectRoot}`
       );
+    }
+
+    // Special case where we don't want to run `npm install` in a jest test because it won't work
+    if (!normalizedOptions.tags?.includes('JEST-TEST')) {
       installPackagesTask(tree);
     }
   };

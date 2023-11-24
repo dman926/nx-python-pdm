@@ -29,8 +29,12 @@ jest.mock('../../pdm/pdm', () => ({
 jest.mock('fs/promises', () => {
   const mod = jest.requireActual<typeof import('fs/promises')>('fs/promises');
   const basename = jest.requireActual<typeof import('path')>('path').basename;
-  const dummyFiles =
-    jest.requireActual<typeof import('./constants')>('./constants').DUMMY_FILES;
+  const dummyFiles = [
+    ...jest.requireActual<typeof import('./constants')>('./constants')
+      .DUMMY_FILES,
+    '.pyre_configuration',
+    'sample.robot',
+  ];
   return {
     ...mod,
     readFile: jest.fn(
@@ -45,8 +49,14 @@ jest.mock('fs/promises', () => {
           | null
       ): Promise<string | Buffer> => {
         const filename = basename(path.toString());
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        if (dummyFiles.includes(filename as any)) {
+        if (filename === '.pyre_configuration') {
+          let out: string | Buffer = '{}';
+          if (!options?.encoding) {
+            out = Buffer.from(out);
+          }
+          return Promise.resolve(out);
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } else if (dummyFiles.includes(filename as any)) {
           let out: string | Buffer =
             '[tool.pdm]\n\n[project]\nname = ""\nversion = ""\ndescription = ""\nauthors = [\n    {name = "", email = ""},\n]\n';
           if (!options?.encoding) {
@@ -84,6 +94,20 @@ jest.mock('fs/promises', () => {
           return Promise.resolve();
         } else {
           return mod.rm(path, options);
+        }
+      }
+    ),
+    mkdir: jest.fn(
+      (
+        path: Parameters<typeof mod.mkdir>[0],
+        options?: Parameters<typeof mod.mkdir>[1]
+      ): ReturnType<typeof mod.mkdir> => {
+        const folderName = basename(path.toString());
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        if (folderName === 'e2e') {
+          return Promise.resolve(undefined);
+        } else {
+          return mod.mkdir(path, options);
         }
       }
     ),
@@ -133,6 +157,7 @@ projectTypes.forEach((projectType) => {
       name: 'test',
       projectType,
       separateE2eProject: false,
+      tags: 'JEST-TEST',
     };
     const expectedPyprojectToml = `[tool.pdm]
 
@@ -195,10 +220,16 @@ authors = [
           ...options,
           unitTestRunner: runner.name,
         };
-        await pythonGenerator(tree, optionsWithAdditionalTarget);
+        const callback = await pythonGenerator(
+          tree,
+          optionsWithAdditionalTarget
+        );
         const config = readProjectConfiguration(tree, 'test');
         expect(config.targets?.test).toBeDefined();
         expect(config.targets?.test.options.command).toContain(runner.command);
+
+        // Callback should work in this configuration
+        expect(async () => await callback()).not.toThrow();
       }
     });
 
@@ -209,8 +240,12 @@ authors = [
           ...options,
           linter: linter.name,
         };
-        await pythonGenerator(tree, optionsWithAdditionalTarget);
+        const callback = await pythonGenerator(
+          tree,
+          optionsWithAdditionalTarget
+        );
         const config = readProjectConfiguration(tree, 'test');
+
         if (linter.name !== 'none') {
           expect(config.targets?.lint).toBeDefined();
           expect(config.targets?.lint.options.command).toContain(
@@ -220,6 +255,9 @@ authors = [
           // When 'none' is specified, no lint target is added
           expect(config.targets?.lint).not.toBeDefined();
         }
+
+        // Callback should work in this configuration
+        expect(async () => await callback()).not.toThrow();
       }
     });
 
@@ -230,8 +268,12 @@ authors = [
           ...options,
           typeChecker: runner.name,
         };
-        await pythonGenerator(tree, optionsWithAdditionalTarget);
+        const callback = await pythonGenerator(
+          tree,
+          optionsWithAdditionalTarget
+        );
         const config = readProjectConfiguration(tree, 'test');
+
         if (runner.name !== 'none') {
           expect(config.targets?.typeCheck).toBeDefined();
           expect(config.targets?.typeCheck.options.command).toContain(
@@ -241,6 +283,9 @@ authors = [
           // When 'none' is specified, no typeCheck target is added
           expect(config.targets?.typeCheck).not.toBeDefined();
         }
+
+        // Callback should work in this configuration
+        expect(async () => await callback()).not.toThrow();
       }
     });
 
@@ -253,7 +298,10 @@ authors = [
             ...options,
             e2eTestRunner: runner.name,
           };
-          await pythonGenerator(tree, optionsWithAdditionalTarget);
+          const callback = await pythonGenerator(
+            tree,
+            optionsWithAdditionalTarget
+          );
           const config = readProjectConfiguration(tree, 'test');
 
           if (isPythonE2ETestRunner(runner.name)) {
@@ -270,6 +318,9 @@ authors = [
             // When 'none' is specified, no e2e target is added
             expect(config.targets?.e2e).not.toBeDefined();
           }
+
+          // Callback should work in this configuration
+          expect(async () => await callback()).not.toThrow();
         }
       },
       10 * 1000
