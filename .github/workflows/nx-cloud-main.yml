@@ -138,7 +138,7 @@ jobs:
           echo "node_version=${node_ver:1}" >> $GITHUB_OUTPUT
           echo "yarn_version=${yarn_ver}" >> $GITHUB_OUTPUT
 
-      - name: Use the cypress cache if available
+      - name: Use the cypress cache if available [npm]
         if: steps.package_manager.outputs.name == 'npm'
         uses: actions/cache@69d9d449aced6a2ede0bc19182fadc3a0a42d2b0 # pin@v3
         with:
@@ -156,6 +156,15 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-${{ steps.versions.outputs.node_version }}-
 
+      - name: Use the cypress cache if available [pnpm]
+        if: steps.package_manager.outputs.name == 'pnpm'
+        uses: actions/cache@69d9d449aced6a2ede0bc19182fadc3a0a42d2b0 # pin@v3
+        with:
+          path: ~/.cache/Cypress
+          key: ${{ runner.os }}-node-${{ steps.versions.outputs.node_version }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-node-${{ steps.versions.outputs.node_version }}-
+
       - name: Get pnpm cache directory path
         if: steps.package_manager.outputs.name == 'pnpm'
         id: pnpm-cache-dir-path
@@ -167,6 +176,15 @@ jobs:
         with:
           path: ${{ steps.pnpm-cache-dir-path.outputs.dir }}
           key: ${{ runner.os }}-node-${{ steps.versions.outputs.node_version }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-node-${{ steps.versions.outputs.node_version }}-
+      
+      - name: Use the cypress cache if available [yarn]
+        if: steps.package_manager.outputs.name == 'yarn'
+        uses: actions/cache@69d9d449aced6a2ede0bc19182fadc3a0a42d2b0 # pin@v3
+        with:
+          path: ~/.cache/Cypress
+          key: ${{ runner.os }}-node-${{ steps.versions.outputs.node_version }}-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             ${{ runner.os }}-node-${{ steps.versions.outputs.node_version }}-
 
