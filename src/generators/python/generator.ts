@@ -67,7 +67,6 @@ export async function pythonGenerator(
 
   await formatFiles(tree);
 
-  // TODO: error handling to alert user better
   return async () => {
     // Initialize PDM specifics
     const cwd = joinPathFragments(tree.root, projectRoot);
