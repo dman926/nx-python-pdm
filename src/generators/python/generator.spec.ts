@@ -134,7 +134,16 @@ projectTypes.forEach((projectType) => {
       projectType,
       separateE2eProject: false,
     };
-    const expectedPyprojectToml = `[tool.pdm]\n\n[project]\nname = "${options.name}"\nversion = "0.1.0"\ndescription = ""\nauthors = [\n    {name = "Your Name", email = "your@email.com"},\n]\n`;
+    const expectedPyprojectToml = `[tool.pdm]
+
+[project]
+name = "${options.name}"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Your Name", email = "your@email.com"},
+]
+`;
     const cwd = '/virtual/test';
 
     beforeEach(() => {
