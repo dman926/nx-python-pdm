@@ -178,7 +178,7 @@ jobs:
           key: ${{ runner.os }}-node-${{ steps.versions.outputs.node_version }}-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-node-${{ steps.versions.outputs.node_version }}-
-      
+
       - name: Use the cypress cache if available [yarn]
         if: steps.package_manager.outputs.name == 'yarn'
         uses: actions/cache@69d9d449aced6a2ede0bc19182fadc3a0a42d2b0 # pin@v3
