@@ -161,7 +161,12 @@ Empty Test
 
     runTasksInSerial(...endTasks);
 
-    installPackagesTask(tree);
+    if (process.env.NODE_ENV !== 'test') {
+      logger.info(
+        `Project ${projectName} created at ${tree.root}/${projectRoot}`
+      );
+      installPackagesTask(tree);
+    }
   };
 }
 
