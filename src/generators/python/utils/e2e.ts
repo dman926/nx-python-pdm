@@ -108,12 +108,26 @@ export const addE2E = async (
         );
 
         if (tree.exists(e2eTestPath)) {
-          const updatedTestContent = `import { test, expect } from '@playwright/test';
+          let updatedTestContent = `import { test, expect } from '@playwright/test';
 
 test('sample test', async () => {
   expect(true).toBeTruthy();
 });
 `;
+
+          // Special case for E2E testing because playwright and jest don't play well together
+          const isE2ETest = tagsInput?.includes('E2E-TESTING');
+          if (isE2ETest) {
+            const tmpContent = updatedTestContent
+              .split('\n')
+              .map((line) => `// ${line}`);
+            tmpContent.unshift(
+              '// File is commented out because of tags[] = "E2E-TESTING"',
+              ''
+            );
+            updatedTestContent = tmpContent.join('\n');
+          }
+
           tree.write(e2eTestPath, updatedTestContent);
         }
 

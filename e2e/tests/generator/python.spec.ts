@@ -1,4 +1,4 @@
-import { joinPathFragments, type ProjectType } from '@nx/devkit';
+import { joinPathFragments, logger, type ProjectType } from '@nx/devkit';
 import {
   checkFilesExist,
   listFiles,
@@ -18,6 +18,8 @@ projectTypes.forEach((projectType) => {
     const baseOptions = {
       name: '',
       projectType,
+      separateE2eProject: false,
+      tags: ['E2E-TESTING'],
     };
 
     // I'm lazy
@@ -237,7 +239,62 @@ projectTypes.forEach((projectType) => {
     });
 
     describe('e2e target', () => {
-      // TODO
+      [
+        {
+          testName: 'when no E2E test runner is specified',
+          projectName: 'no-e2e-target',
+          command: '',
+        },
+        {
+          testName: 'when e2eTestRunner: "none" is specified',
+          projectName: 'no-e2e-target',
+          command: ' --e2eTestRunner none',
+        },
+      ].forEach(({ testName, projectName, command }) => {
+        it(`should not include an e2e target ${testName}`, async () => {
+          const name = uniq(`${projectName}-target-test`);
+          baseOptions.name = name;
+          await runNxCommandAsync(
+            `generate @dman926/nx-python-pdm:python ${options()}${command} --no-interactive`
+          );
+          names.push(name);
+
+          let output = '';
+          // Disable the console as it is expected to throw and NX will log it
+          // eslint-disable-next-line @typescript-eslint/no-empty-function
+          jest.spyOn(console, 'log').mockImplementation(() => {});
+          expect(() => {
+            output = runNxCommand(`e2e ${name}`);
+          }).toThrowWithAdditional(undefined, output);
+
+          jest.spyOn(console, 'log').mockRestore();
+        });
+      });
+
+      ['cypress', 'playwright', 'robotframework'].forEach((e2eTestRunner) => {
+        it(
+          `should be able to run type checking on generated projects with ${e2eTestRunner}`,
+          async () => {
+            const name = uniq(`${e2eTestRunner}-e2e-target-test`);
+            baseOptions.name = name;
+            await runNxCommandAsync(
+              `generate @dman926/nx-python-pdm:python ${options()} --e2eTestRunner ${e2eTestRunner} --no-interactive`
+            );
+            names.push(name);
+
+            let output = '';
+            expect(() => {
+              try {
+                output = runNxCommand(`e2e ${name} --quiet`);
+              } catch (error) {
+                logger.error(error);
+                throw error;
+              }
+            }).not.toThrowWithAdditional(undefined, output);
+          },
+          25 * 1000
+        );
+      });
     });
   });
 });
