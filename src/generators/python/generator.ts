@@ -7,8 +7,9 @@ import {
   joinPathFragments,
   runTasksInSerial,
   logger,
+  installPackagesTask,
 } from '@nx/devkit';
-import { readFile, writeFile, rm } from 'fs/promises';
+import { readFile, writeFile, rm, mkdir } from 'fs/promises';
 import { DUMMY_FILES, isPythonE2ETestRunner } from './constants';
 import {
   getTargets,
@@ -133,6 +134,7 @@ EOF`;
       switch (normalizedOptions.e2eTestRunner) {
         case 'robotframework': {
           // Add sample robot file
+          const e2eFolderPath = joinPathFragments(cwd, 'e2e');
           const robotSampleFilePath = joinPathFragments(
             cwd,
             'e2e',
@@ -146,6 +148,7 @@ Empty Test
     [Documentation]    This test case does nothing
     No Operation
 `;
+          await mkdir(e2eFolderPath, { recursive: true });
           await writeFile(robotSampleFilePath, robotSampleFileContent);
           break;
         }
@@ -157,6 +160,8 @@ Empty Test
     }
 
     runTasksInSerial(...endTasks);
+
+    installPackagesTask(tree);
   };
 }
 
