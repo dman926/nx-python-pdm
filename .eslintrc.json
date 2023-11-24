@@ -3,7 +3,12 @@
   "overrides": [
     {
       "files": ["*.ts", "*.tsx"],
-      "rules": {}
+      "rules": {
+        "@typescript-eslint/no-unused-vars": [
+          "error",
+          { "varsIgnorePattern": "^_" }
+        ]
+      }
     },
     {
       "files": ["*.js", "*.jsx"],
